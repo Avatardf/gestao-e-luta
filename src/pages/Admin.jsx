@@ -195,6 +195,7 @@ export default function Admin() {
   const [votes, setVotes]         = useState([])
   const [visits, setVisits]       = useState([])
   const [directors, setDirectors] = useState([])
+  const [messages, setMessages]   = useState([])
   const [loading, setLoading]     = useState(false)
   const [resetting, setResetting] = useState(false)
   const [tab, setTab]             = useState('votos')
@@ -209,14 +210,16 @@ export default function Admin() {
 
   async function loadData() {
     setLoading(true)
-    const [{ data: v }, { data: vi }, { data: dir }] = await Promise.all([
+    const [{ data: v }, { data: vi }, { data: dir }, { data: msg }] = await Promise.all([
       supabase.from('votes').select('*').order('created_at', { ascending: false }),
       supabase.from('visits').select('*').order('created_at', { ascending: false }),
       supabase.from('directors').select('*').order('ordem', { ascending: true }),
+      supabase.from('messages').select('*').order('created_at', { ascending: false }),
     ])
     if (v)   setVotes(v)
     if (vi)  setVisits(vi)
     if (dir) setDirectors(dir)
+    if (msg) setMessages(msg)
     setLoading(false)
   }
 
@@ -330,10 +333,13 @@ export default function Admin() {
 
             {/* Tabs */}
             <div className="flex gap-1 mb-4 border-b border-navy-700">
-              {['votos', 'visitas', 'diretores'].map(t => (
+              {['votos', 'visitas', 'diretores', 'mensagens'].map(t => (
                 <button key={t} onClick={() => setTab(t)}
                   className={`font-heading text-xs uppercase tracking-widest px-5 py-3 transition-colors border-b-2 -mb-px ${tab === t ? 'border-gold-500 text-gold-400' : 'border-transparent text-gray-500 hover:text-gray-300'}`}>
-                  {t === 'votos' ? `Votos (${votes.length})` : t === 'visitas' ? `Visitas (${visits.length})` : `Diretores (${directors.length})`}
+                  {t === 'votos' ? `Votos (${votes.length})`
+                    : t === 'visitas' ? `Visitas (${visits.length})`
+                    : t === 'diretores' ? `Diretores (${directors.length})`
+                    : `Mensagens (${messages.length})`}
                 </button>
               ))}
             </div>
@@ -413,6 +419,27 @@ export default function Admin() {
                     <p className="text-xs mt-2">Rode o SQL de criação da tabela no Supabase.</p>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Messages */}
+            {tab === 'mensagens' && (
+              <div className="space-y-3">
+                {messages.length === 0 && (
+                  <div className="text-center py-12 text-gray-600">Nenhuma mensagem recebida ainda.</div>
+                )}
+                {messages.map((m, i) => (
+                  <div key={m.id} className="border border-navy-700 bg-navy-950 p-5">
+                    <div className="flex items-start justify-between gap-4 mb-3">
+                      <div>
+                        <p className="font-heading text-white text-sm tracking-wide">{m.nome}</p>
+                        <p className="text-gray-500 text-xs mt-0.5">{m.email}{m.matricula ? ` · Mat. ${m.matricula}` : ''}</p>
+                      </div>
+                      <span className="text-gray-600 text-xs flex-shrink-0">{fmt(m.created_at)}</span>
+                    </div>
+                    <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">{m.mensagem}</p>
+                  </div>
+                ))}
               </div>
             )}
 

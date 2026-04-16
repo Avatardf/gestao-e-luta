@@ -1,19 +1,27 @@
 import { useState } from 'react'
 import { Send, CheckCircle2 } from 'lucide-react'
+import { supabase } from '../lib/supabase'
 
 export default function Contato() {
   const [form, setForm] = useState({ nome: '', matricula: '', email: '', mensagem: '' })
   const [enviado, setEnviado] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [erro, setErro] = useState('')
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
-    // Simulação de envio — integre com EmailJS, Formspree ou backend real
-    await new Promise(r => setTimeout(r, 1200))
+    setErro('')
+    const { error } = await supabase.from('messages').insert({
+      nome: form.nome,
+      matricula: form.matricula || null,
+      email: form.email,
+      mensagem: form.mensagem,
+    })
     setLoading(false)
+    if (error) { setErro('Erro ao enviar. Tente novamente.'); return }
     setEnviado(true)
     setForm({ nome: '', matricula: '', email: '', mensagem: '' })
   }
@@ -117,6 +125,7 @@ export default function Contato() {
                   )}
                 </button>
 
+                {erro && <p className="text-red-400 text-xs text-center">{erro}</p>}
                 <p className="text-gray-600 text-xs text-center">
                   Suas informações são confidenciais e não serão compartilhadas.
                 </p>
