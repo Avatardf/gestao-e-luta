@@ -1,3 +1,4 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Sobre from './components/Sobre'
@@ -6,8 +7,11 @@ import Propostas from './components/Propostas'
 import SimulacaoVoto from './components/SimulacaoVoto'
 import Contato from './components/Contato'
 import Footer from './components/Footer'
+import Admin from './pages/Admin'
+import { useVisitor } from './hooks/useVisitor'
 
-export default function App() {
+function Site() {
+  useVisitor() // track visit on page load
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -32,5 +36,16 @@ export default function App() {
         </svg>
       </a>
     </div>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/"      element={<Site />} />
+        <Route path="/admin" element={<Admin />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
