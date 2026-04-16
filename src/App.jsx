@@ -6,6 +6,8 @@ import Diretores from './components/Diretores'
 import Propostas from './components/Propostas'
 import SimulacaoVoto from './components/SimulacaoVoto'
 import Contato from './components/Contato'
+import Depoimentos from './components/Depoimentos'
+import Noticias from './components/Noticias'
 import Footer from './components/Footer'
 import Admin from './pages/Admin'
 import { useVisitor } from './hooks/useVisitor'
@@ -19,6 +21,8 @@ function Site() {
       <Sobre />
       <Diretores />
       <Propostas />
+      <Noticias />
+      <Depoimentos />
       <SimulacaoVoto />
       <Contato />
       <Footer />

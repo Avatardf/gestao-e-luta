@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
-import { Shield, RefreshCw, Trash2, LogOut, Loader2, Users, Vote, MapPin, Clock, Edit2, Save, X, ChevronDown, ChevronUp, Camera } from 'lucide-react'
+import { Shield, RefreshCw, Trash2, LogOut, Loader2, Users, Vote, MapPin, Clock, Edit2, Save, X, ChevronDown, ChevronUp, Camera, Plus, Newspaper, MessageSquare } from 'lucide-react'
 
 const META       = 600
 const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASSWORD || 'gestao2025'
@@ -187,6 +187,128 @@ function DirectorEditor({ director, onSaved }) {
   )
 }
 
+// ── Gerenciador de Notícias ─────────────────────────────────────
+function NoticiaAdmin({ noticias, onRefresh }) {
+  const empty = { titulo: '', resumo: '', conteudo: '', imagem_url: '' }
+  const [form, setForm]     = useState(empty)
+  const [editId, setEditId] = useState(null)
+  const [saving, setSaving] = useState(false)
+  const [showForm, setShowForm] = useState(false)
+
+  const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }))
+
+  function iniciarEdicao(n) {
+    setForm({ titulo: n.titulo, resumo: n.resumo, conteudo: n.conteudo, imagem_url: n.imagem_url || '' })
+    setEditId(n.id)
+    setShowForm(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function cancelar() {
+    setForm(empty)
+    setEditId(null)
+    setShowForm(false)
+  }
+
+  async function salvar() {
+    if (!form.titulo || !form.resumo || !form.conteudo) return alert('Preencha título, resumo e conteúdo.')
+    setSaving(true)
+    if (editId) {
+      await supabase.from('noticias').update(form).eq('id', editId)
+    } else {
+      await supabase.from('noticias').insert(form)
+    }
+    setSaving(false)
+    cancelar()
+    onRefresh()
+  }
+
+  async function excluir(id) {
+    if (!confirm('Excluir esta notícia?')) return
+    await supabase.from('noticias').delete().eq('id', id)
+    onRefresh()
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Botão nova notícia */}
+      {!showForm && (
+        <button
+          onClick={() => setShowForm(true)}
+          className="flex items-center gap-2 bg-gold-500 text-navy-950 font-heading text-xs uppercase tracking-widest px-5 py-3 hover:bg-gold-400 transition-colors"
+        >
+          <Plus size={14} /> Nova notícia
+        </button>
+      )}
+
+      {/* Formulário */}
+      {showForm && (
+        <div className="border border-navy-700 bg-navy-950 p-6 space-y-4">
+          <h4 className="font-heading text-white tracking-widest text-sm">{editId ? 'Editar notícia' : 'Nova notícia'}</h4>
+          <div>
+            <label className="block font-heading text-xs text-gray-500 uppercase tracking-widest mb-1.5">Título</label>
+            <input name="titulo" value={form.titulo} onChange={handleChange}
+              className="w-full bg-navy-900 border border-navy-700 text-white px-3 py-2 text-sm focus:outline-none focus:border-gold-500 transition-colors" />
+          </div>
+          <div>
+            <label className="block font-heading text-xs text-gray-500 uppercase tracking-widest mb-1.5">Resumo (aparece no card)</label>
+            <textarea name="resumo" value={form.resumo} onChange={handleChange} rows={2}
+              className="w-full bg-navy-900 border border-navy-700 text-white px-3 py-2 text-sm focus:outline-none focus:border-gold-500 transition-colors resize-none" />
+          </div>
+          <div>
+            <label className="block font-heading text-xs text-gray-500 uppercase tracking-widest mb-1.5">Conteúdo completo</label>
+            <textarea name="conteudo" value={form.conteudo} onChange={handleChange} rows={6}
+              className="w-full bg-navy-900 border border-navy-700 text-white px-3 py-2 text-sm focus:outline-none focus:border-gold-500 transition-colors resize-none" />
+          </div>
+          <div>
+            <label className="block font-heading text-xs text-gray-500 uppercase tracking-widest mb-1.5">URL da imagem (opcional)</label>
+            <input name="imagem_url" value={form.imagem_url} onChange={handleChange} placeholder="https://..."
+              className="w-full bg-navy-900 border border-navy-700 text-white px-3 py-2 text-sm focus:outline-none focus:border-gold-500 transition-colors" />
+          </div>
+          <div className="flex gap-3 justify-end">
+            <button onClick={cancelar}
+              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors font-heading text-xs uppercase tracking-widest px-4 py-2">
+              <X size={14} /> Cancelar
+            </button>
+            <button onClick={salvar} disabled={saving}
+              className="flex items-center gap-2 bg-gold-500 text-navy-950 font-heading text-xs uppercase tracking-widest px-5 py-2 hover:bg-gold-400 transition-colors">
+              {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+              {editId ? 'Salvar alterações' : 'Publicar'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Lista */}
+      {noticias.length === 0 && !showForm && (
+        <div className="text-center py-12 text-gray-600">Nenhuma notícia publicada ainda.</div>
+      )}
+      {noticias.map(n => (
+        <div key={n.id} className="border border-navy-700 bg-navy-950 p-5 flex gap-4 items-start">
+          {n.imagem_url && (
+            <img src={n.imagem_url} alt="" className="w-16 h-16 object-cover flex-shrink-0 border border-navy-700" />
+          )}
+          <div className="flex-1 min-w-0">
+            <p className="font-heading text-white text-sm tracking-wide truncate">{n.titulo}</p>
+            <p className="text-gray-400 text-xs mt-1 line-clamp-2">{n.resumo}</p>
+            <p className="text-gray-600 text-xs mt-2">{new Date(n.created_at).toLocaleDateString('pt-BR')}</p>
+          </div>
+          <div className="flex gap-2 flex-shrink-0">
+            <button onClick={() => iniciarEdicao(n)}
+              className="text-gray-500 hover:text-gold-400 transition-colors" title="Editar">
+              <Edit2 size={15} />
+            </button>
+            <button onClick={() => excluir(n.id)}
+              className="text-red-500/50 hover:text-red-400 transition-colors" title="Excluir">
+              <Trash2 size={15} />
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // ── Página Admin ────────────────────────────────────────────────
 export default function Admin() {
   const [auth, setAuth]           = useState(false)
@@ -195,10 +317,12 @@ export default function Admin() {
   const [votes, setVotes]         = useState([])
   const [visits, setVisits]       = useState([])
   const [directors, setDirectors] = useState([])
-  const [messages, setMessages]   = useState([])
-  const [loading, setLoading]     = useState(false)
-  const [resetting, setResetting] = useState(false)
-  const [tab, setTab]             = useState('votos')
+  const [messages, setMessages]     = useState([])
+  const [depoimentos, setDepoimentos] = useState([])
+  const [noticias, setNoticias]     = useState([])
+  const [loading, setLoading]       = useState(false)
+  const [resetting, setResetting]   = useState(false)
+  const [tab, setTab]               = useState('votos')
 
   useEffect(() => { if (auth) loadData() }, [auth])
 
@@ -210,16 +334,20 @@ export default function Admin() {
 
   async function loadData() {
     setLoading(true)
-    const [{ data: v }, { data: vi }, { data: dir }, { data: msg }] = await Promise.all([
+    const [{ data: v }, { data: vi }, { data: dir }, { data: msg }, { data: dep }, { data: not }] = await Promise.all([
       supabase.from('votes').select('*').order('created_at', { ascending: false }),
       supabase.from('visits').select('*').order('created_at', { ascending: false }),
       supabase.from('directors').select('*').order('ordem', { ascending: true }),
       supabase.from('messages').select('*').order('created_at', { ascending: false }),
+      supabase.from('depoimentos').select('*').order('created_at', { ascending: false }),
+      supabase.from('noticias').select('*').order('created_at', { ascending: false }),
     ])
     if (v)   setVotes(v)
     if (vi)  setVisits(vi)
     if (dir) setDirectors(dir)
     if (msg) setMessages(msg)
+    if (dep) setDepoimentos(dep)
+    if (not) setNoticias(not)
     setLoading(false)
   }
 
@@ -333,13 +461,15 @@ export default function Admin() {
 
             {/* Tabs */}
             <div className="flex gap-1 mb-4 border-b border-navy-700">
-              {['votos', 'visitas', 'diretores', 'mensagens'].map(t => (
+              {['votos', 'visitas', 'diretores', 'mensagens', 'depoimentos', 'noticias'].map(t => (
                 <button key={t} onClick={() => setTab(t)}
-                  className={`font-heading text-xs uppercase tracking-widest px-5 py-3 transition-colors border-b-2 -mb-px ${tab === t ? 'border-gold-500 text-gold-400' : 'border-transparent text-gray-500 hover:text-gray-300'}`}>
+                  className={`font-heading text-xs uppercase tracking-widest px-4 py-3 transition-colors border-b-2 -mb-px whitespace-nowrap ${tab === t ? 'border-gold-500 text-gold-400' : 'border-transparent text-gray-500 hover:text-gray-300'}`}>
                   {t === 'votos' ? `Votos (${votes.length})`
                     : t === 'visitas' ? `Visitas (${visits.length})`
                     : t === 'diretores' ? `Diretores (${directors.length})`
-                    : `Mensagens (${messages.length})`}
+                    : t === 'mensagens' ? `Mensagens (${messages.length})`
+                    : t === 'depoimentos' ? `Depoimentos (${depoimentos.length})`
+                    : `Notícias (${noticias.length})`}
                 </button>
               ))}
             </div>
@@ -442,6 +572,42 @@ export default function Admin() {
                 ))}
               </div>
             )}
+
+            {/* Depoimentos */}
+            {tab === 'depoimentos' && (
+              <div className="space-y-3">
+                <p className="text-gray-500 text-xs mb-4">Exclua depoimentos ofensivos ou inadequados.</p>
+                {depoimentos.length === 0 && (
+                  <div className="text-center py-12 text-gray-600">Nenhum depoimento ainda.</div>
+                )}
+                {depoimentos.map(d => (
+                  <div key={d.id} className="border border-navy-700 bg-navy-950 p-5 flex gap-4 items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-1">
+                        <p className="font-heading text-white text-sm tracking-wide">{d.nome}</p>
+                        {d.lotacao && <span className="text-gold-500 text-xs font-heading tracking-widest uppercase">{d.lotacao}</span>}
+                      </div>
+                      <p className="text-gray-300 text-sm leading-relaxed">"{d.texto}"</p>
+                      <p className="text-gray-600 text-xs mt-2">{fmt(d.created_at)}</p>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        if (!confirm('Excluir este depoimento?')) return
+                        await supabase.from('depoimentos').delete().eq('id', d.id)
+                        loadData()
+                      }}
+                      className="text-red-500/50 hover:text-red-400 transition-colors flex-shrink-0"
+                      title="Excluir"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Notícias */}
+            {tab === 'noticias' && <NoticiaAdmin noticias={noticias} onRefresh={loadData} />}
 
             {/* Reset */}
             <div className="mt-12 pt-8 border-t border-navy-800 flex items-center justify-between">

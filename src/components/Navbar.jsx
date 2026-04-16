@@ -5,6 +5,8 @@ const links = [
   { href: '#sobre', label: 'Sobre' },
   { href: '#diretores', label: 'Diretores' },
   { href: '#propostas', label: 'Propostas' },
+  { href: '#noticias', label: 'Notícias' },
+  { href: '#depoimentos', label: 'Depoimentos' },
   { href: '#votacao', label: 'Vote Agora' },
   { href: '#contato', label: 'Contato' },
 ]

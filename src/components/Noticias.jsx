@@ -1,0 +1,148 @@
+import { useState, useEffect } from 'react'
+import { Loader2, Share2, Calendar, ChevronRight, X } from 'lucide-react'
+import { supabase } from '../lib/supabase'
+
+function fmt(dateStr) {
+  return new Date(dateStr).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
+}
+
+function ModalNoticia({ noticia, onClose }) {
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
+  }, [])
+
+  function compartilhar() {
+    const texto = `${noticia.titulo} — Chapa Gestão e Luta\n\n${noticia.resumo}\n\nAcesse: ${window.location.href}`
+    if (navigator.share) {
+      navigator.share({ title: noticia.titulo, text: noticia.resumo, url: window.location.href })
+    } else {
+      navigator.clipboard.writeText(texto)
+      alert('Link copiado para a área de transferência!')
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80" onClick={onClose}>
+      <div
+        className="bg-navy-900 border border-navy-700 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+        onClick={e => e.stopPropagation()}
+      >
+        {noticia.imagem_url && (
+          <img src={noticia.imagem_url} alt={noticia.titulo} className="w-full h-56 object-cover" />
+        )}
+        <div className="p-8">
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <span className="text-gray-500 text-xs flex items-center gap-1.5">
+              <Calendar size={12} /> {fmt(noticia.created_at)}
+            </span>
+            <div className="flex gap-2">
+              <button
+                onClick={compartilhar}
+                className="flex items-center gap-1.5 text-gray-400 hover:text-gold-500 transition-colors font-heading text-xs uppercase tracking-widest"
+              >
+                <Share2 size={13} /> Compartilhar
+              </button>
+              <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors ml-2">
+                <X size={18} />
+              </button>
+            </div>
+          </div>
+          <h2 className="font-heading text-white text-xl tracking-wide leading-snug mb-4">{noticia.titulo}</h2>
+          <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">{noticia.conteudo}</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CardNoticia({ noticia, onClick }) {
+  function compartilhar(e) {
+    e.stopPropagation()
+    const texto = `${noticia.titulo} — Chapa Gestão e Luta\n\n${noticia.resumo}\n\nAcesse: ${window.location.href}`
+    if (navigator.share) {
+      navigator.share({ title: noticia.titulo, text: noticia.resumo, url: window.location.href })
+    } else {
+      navigator.clipboard.writeText(texto)
+      alert('Link copiado!')
+    }
+  }
+
+  return (
+    <div
+      className="bg-navy-900 border border-navy-700 hover:border-gold-500/40 transition-all duration-200 cursor-pointer group flex flex-col"
+      onClick={onClick}
+    >
+      {noticia.imagem_url && (
+        <img src={noticia.imagem_url} alt={noticia.titulo} className="w-full h-44 object-cover" />
+      )}
+      <div className="p-6 flex flex-col flex-1">
+        <span className="text-gray-500 text-xs flex items-center gap-1.5 mb-3">
+          <Calendar size={11} /> {fmt(noticia.created_at)}
+        </span>
+        <h3 className="font-heading text-white tracking-wide text-base leading-snug mb-2 group-hover:text-gold-400 transition-colors">
+          {noticia.titulo}
+        </h3>
+        <p className="text-gray-400 text-sm leading-relaxed flex-1 line-clamp-3">{noticia.resumo}</p>
+        <div className="mt-4 pt-4 border-t border-navy-700 flex items-center justify-between">
+          <span className="font-heading text-gold-500 text-xs uppercase tracking-widest flex items-center gap-1 group-hover:gap-2 transition-all">
+            Ler mais <ChevronRight size={12} />
+          </span>
+          <button
+            onClick={compartilhar}
+            className="text-gray-600 hover:text-gold-500 transition-colors"
+            title="Compartilhar"
+          >
+            <Share2 size={14} />
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function Noticias() {
+  const [noticias, setNoticias] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [selecionada, setSelecionada] = useState(null)
+
+  useEffect(() => {
+    async function carregar() {
+      const { data } = await supabase
+        .from('noticias')
+        .select('*')
+        .order('created_at', { ascending: false })
+      if (data) setNoticias(data)
+      setLoading(false)
+    }
+    carregar()
+  }, [])
+
+  if (!loading && noticias.length === 0) return null
+
+  return (
+    <section id="noticias" className="py-24 bg-navy-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <p className="font-heading text-gold-500 text-sm tracking-widest uppercase mb-2">Fique por dentro</p>
+          <h2 className="section-title">Notícias</h2>
+          <span className="gold-line mx-auto" />
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <Loader2 className="text-gold-500 animate-spin" size={32} />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {noticias.map(n => (
+              <CardNoticia key={n.id} noticia={n} onClick={() => setSelecionada(n)} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {selecionada && <ModalNoticia noticia={selecionada} onClose={() => setSelecionada(null)} />}
+    </section>
+  )
+}
