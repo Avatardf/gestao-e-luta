@@ -24,38 +24,36 @@ export async function generateShareImage() {
   ctx.fillStyle = '#C9A227'
   ctx.fillRect(0, 0, W, 7)
 
-  // ── Badge "EU APOIO" ─────────────────────────────────────────
-  const bW = 310, bH = 48, bX = (W - bW) / 2, bY = 90
-  ctx.fillStyle   = 'rgba(201,162,39,0.12)'
-  ctx.strokeStyle = 'rgba(201,162,39,0.45)'
-  ctx.lineWidth   = 1.5
-  ctx.fillRect(bX, bY, bW, bH)
-  ctx.strokeRect(bX, bY, bW, bH)
-
+  // ── "EU APOIO" grande centralizado ───────────────────────────
   ctx.fillStyle    = '#C9A227'
-  ctx.font         = '600 19px "Oswald", sans-serif'
+  ctx.font         = 'bold 110px "Oswald", sans-serif'
   ctx.textAlign    = 'center'
-  ctx.letterSpacing = '0.25em'
-  ctx.fillText('● EU APOIO ●', W / 2, bY + 32)
+  ctx.letterSpacing = '0.15em'
+  ctx.fillText('EU APOIO', W / 2, 200)
   ctx.letterSpacing = '0em'
+
+  // linha decorativa sob EU APOIO
+  ctx.strokeStyle = '#C9A227'
+  ctx.lineWidth   = 3
+  ctx.beginPath(); ctx.moveTo(160, 220); ctx.lineTo(W - 160, 220); ctx.stroke()
 
   // ── GL monogram ───────────────────────────────────────────────
   ctx.fillStyle = '#C9A227'
-  ctx.fillRect((W - 64) / 2, 170, 64, 64)
+  ctx.fillRect((W - 56) / 2, 248, 56, 56)
   ctx.fillStyle = '#0D1F3C'
-  ctx.font      = 'bold 28px "Oswald", sans-serif'
-  ctx.fillText('GL', W / 2, 213)
+  ctx.font      = 'bold 24px "Oswald", sans-serif'
+  ctx.fillText('GL', W / 2, 285)
 
   // ── GESTÃO (branco) ───────────────────────────────────────────
   ctx.fillStyle    = '#FFFFFF'
-  ctx.font         = 'bold 170px "Oswald", sans-serif'
+  ctx.font         = 'bold 160px "Oswald", sans-serif'
   ctx.letterSpacing = '0.05em'
-  ctx.fillText('GESTÃO', W / 2, 460)
+  ctx.fillText('GESTÃO', W / 2, 490)
 
   // ── & LUTA (dourado) ──────────────────────────────────────────
   ctx.fillStyle = '#C9A227'
-  ctx.font      = 'bold 150px "Oswald", sans-serif'
-  ctx.fillText('& LUTA', W / 2, 620)
+  ctx.font      = 'bold 140px "Oswald", sans-serif'
+  ctx.fillText('& LUTA', W / 2, 640)
   ctx.letterSpacing = '0em'
 
   // ── Divisor ───────────────────────────────────────────────────
