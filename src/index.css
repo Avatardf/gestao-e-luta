@@ -34,7 +34,7 @@
   }
 
   .card {
-    @apply bg-white border border-slate-200 p-6 hover:border-gold-500 transition-all duration-300 dark:bg-navy-900 dark:border-navy-700;
+    @apply bg-slate-100 border border-slate-200 p-6 hover:border-gold-500 transition-all duration-300 dark:bg-navy-900 dark:border-navy-700;
   }
 }
 
@@ -43,14 +43,11 @@
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #071225;
 }
 ::-webkit-scrollbar-thumb {
   background: #C9A227;
   border-radius: 3px;
-}
-.dark ::-webkit-scrollbar-track {
-  background: #071225;
 }
 
 /* Flip card */
