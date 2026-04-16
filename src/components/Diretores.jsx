@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { MessageCircle, Instagram, RotateCcw } from 'lucide-react'
-import { diretores } from '../data/diretores'
+import { MessageCircle, Instagram, RotateCcw, Loader2 } from 'lucide-react'
+import { useDirectors } from '../hooks/useDirectors'
 
 function FlipCard({ d }) {
   const [flipped, setFlipped] = useState(false)
@@ -102,6 +102,8 @@ function FlipCard({ d }) {
 }
 
 export default function Diretores() {
+  const { directors, loading } = useDirectors()
+
   return (
     <section id="diretores" className="py-24 bg-navy-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -115,11 +117,17 @@ export default function Diretores() {
           <p className="text-gray-600 text-xs mt-2">Passe o mouse ou toque no card para conhecer cada diretor.</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {diretores.map((d) => (
-            <FlipCard key={d.id} d={d} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <Loader2 className="text-gold-500 animate-spin" size={36} />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {directors.map((d) => (
+              <FlipCard key={d.id} d={d} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )
