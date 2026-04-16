@@ -38,7 +38,7 @@ function FlipCard({ d }) {
             <h3 className="font-heading text-lg text-white tracking-wide mt-0.5">{d.nome}</h3>
             {d.delegacia && <p className="text-gray-500 text-xs mt-0.5">{d.delegacia}</p>}
 
-            <p className="text-gray-400 text-sm leading-relaxed mt-3 flex-1 line-clamp-3">{d.bio}</p>
+            <p className="text-gray-400 text-sm leading-relaxed mt-3 flex-1 overflow-hidden">{d.resumo || d.bio}</p>
 
             <div className="mt-4 pt-4 border-t border-navy-700 flex items-center justify-between">
               <span className="text-gray-600 text-xs font-heading tracking-wide">Passe o mouse ou toque</span>

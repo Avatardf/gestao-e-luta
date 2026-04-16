@@ -18,6 +18,7 @@ function DirectorEditor({ director, onSaved }) {
     nome:      director.nome      || '',
     cargo:     director.cargo     || '',
     delegacia: director.delegacia || '',
+    resumo:    director.resumo    || director.bio || '',
     bio:       director.bio       || '',
     whatsapp:  director.whatsapp  || '',
     instagram: director.instagram || '',
@@ -82,15 +83,30 @@ function DirectorEditor({ director, onSaved }) {
                 className="w-full bg-navy-900 border border-navy-700 text-white px-3 py-2 text-sm focus:outline-none focus:border-gold-500 transition-colors"
                 placeholder="5521999999999" />
             </div>
+            <div>
+              <label className="block font-heading text-xs text-gray-500 uppercase tracking-widest mb-1.5">Instagram</label>
+              <input name="instagram" value={form.instagram} onChange={handleChange}
+                className="w-full bg-navy-900 border border-navy-700 text-white px-3 py-2 text-sm focus:outline-none focus:border-gold-500 transition-colors"
+                placeholder="@usuario" />
+            </div>
           </div>
 
           <div>
             <label className="block font-heading text-xs text-gray-500 uppercase tracking-widest mb-1.5">
-              Bio / Trajetória <span className="text-gray-600 normal-case font-body tracking-normal">(aparece no verso do card)</span>
+              Texto da frente <span className="text-gray-600 normal-case font-body tracking-normal">(resumo — aparece na frente do card)</span>
+            </label>
+            <textarea name="resumo" value={form.resumo} onChange={handleChange} rows={3}
+              className="w-full bg-navy-900 border border-navy-700 text-white px-3 py-2 text-sm focus:outline-none focus:border-gold-500 transition-colors resize-none" />
+            <p className="text-gray-600 text-xs mt-1">{form.resumo.length} caracteres — recomendado até 160</p>
+          </div>
+
+          <div>
+            <label className="block font-heading text-xs text-gray-500 uppercase tracking-widest mb-1.5">
+              Texto do verso <span className="text-gray-600 normal-case font-body tracking-normal">(perfil completo — aparece no verso do card)</span>
             </label>
             <textarea name="bio" value={form.bio} onChange={handleChange} rows={4}
               className="w-full bg-navy-900 border border-navy-700 text-white px-3 py-2 text-sm focus:outline-none focus:border-gold-500 transition-colors resize-none" />
-            <p className="text-gray-600 text-xs mt-1">{form.bio.length} caracteres — recomendado até 220</p>
+            <p className="text-gray-600 text-xs mt-1">{form.bio.length} caracteres — recomendado até 300</p>
           </div>
 
           <div className="flex gap-3 justify-end">
