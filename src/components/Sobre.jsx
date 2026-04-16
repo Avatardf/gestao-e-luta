@@ -20,10 +20,10 @@ export default function Sobre() {
               A chapa <strong className="text-slate-900 dark:text-white font-heading tracking-wide">GESTÃO &amp; LUTA</strong> foi construída contemplando todos os cargos e gerações da Polícia Civil. Aqui estão policiais mais novos e os mais experientes — todos reunidos num consenso sobre os rumos que o sindicato e a polícia devem seguir.
             </p>
             <p className="text-slate-700 dark:text-gray-300 leading-relaxed mb-4">
-              <span className="text-gold-400 font-heading tracking-wide">Você conhece o nosso trabalho. Você nos viu trabalhando.</span> O nosso compromisso agora é maior. Nós sabemos fazer, já fizemos, e vamos fazer muito mais agora que estamos melhor estruturados.
+              <span className="text-gold-600 dark:text-gold-400 font-heading tracking-wide">Você conhece o nosso trabalho. Você nos viu trabalhando.</span> O nosso compromisso agora é maior. Nós sabemos fazer, já fizemos, e vamos fazer muito mais agora que estamos melhor estruturados.
             </p>
             <p className="text-slate-700 dark:text-gray-300 leading-relaxed mb-8">
-              Não adianta só apoiar — <span className="text-gold-400">venha votar</span>. Conte conosco.
+              Não adianta só apoiar — <span className="text-gold-600 dark:text-gold-400">venha votar</span>. Conte conosco.
             </p>
             <a href="#propostas" className="btn-primary inline-block">
               Ver todas as propostas

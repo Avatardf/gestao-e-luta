@@ -39,7 +39,7 @@ export default function Countdown() {
   if (!time) {
     return (
       <div className="inline-flex items-center gap-2 bg-gold-500/10 border border-gold-500/30 px-6 py-3">
-        <span className="text-gold-400 font-heading tracking-widest text-sm uppercase">Eleição em andamento!</span>
+        <span className="text-gold-600 dark:text-gold-400 font-heading tracking-widest text-sm uppercase">Eleição em andamento!</span>
       </div>
     )
   }
