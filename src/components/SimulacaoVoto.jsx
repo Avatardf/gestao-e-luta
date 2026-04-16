@@ -231,10 +231,16 @@ export default function SimulacaoVoto() {
                   </div>
                 ))}
 
-                <button onClick={handleShare} disabled={sharing} className="w-full btn-primary flex items-center justify-center gap-2">
-                  {sharing ? <Loader2 size={16} className="animate-spin" /> : <Share2 size={16} />}
-                  {sharing ? 'Gerando imagem...' : 'Compartilhar'}
-                </button>
+                {selected === 1 || (alreadyVoted) ? (
+                  <button onClick={handleShare} disabled={sharing} className="w-full btn-primary flex items-center justify-center gap-2">
+                    {sharing ? <Loader2 size={16} className="animate-spin" /> : <Share2 size={16} />}
+                    {sharing ? 'Gerando imagem...' : 'Compartilhar apoio'}
+                  </button>
+                ) : (
+                  <p className="text-center text-gray-600 text-xs pt-2">
+                    O compartilhamento está disponível apenas para quem apoia a chapa Gestão e Luta.
+                  </p>
+                )}
               </div>
             )}
           </>
