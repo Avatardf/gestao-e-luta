@@ -6,7 +6,7 @@ export const diretores = [
     delegacia: "",
     foto: null,
     bio: "Liderança experiente que construiu a chapa Gestão e Luta com foco em consenso, representatividade e os rumos que o sindicato e a polícia devem seguir.",
-    whatsapp: "5521999990001",
+    whatsapp: "5521976237666",
     instagram: "",
   },
   {
@@ -16,7 +16,7 @@ export const diretores = [
     delegacia: "",
     foto: null,
     bio: "Comprometida com a valorização de todas as categorias e gerações da Polícia Civil do Estado do Rio de Janeiro.",
-    whatsapp: "5521999990002",
+    whatsapp: "5521997760404",
     instagram: "",
   },
   {
@@ -26,7 +26,7 @@ export const diretores = [
     delegacia: "",
     foto: null,
     bio: "Responsável pela organização e comunicação interna da chapa, garantindo transparência em todos os processos administrativos.",
-    whatsapp: "5521999990003",
+    whatsapp: "5521999282701",
     instagram: "",
   },
   {
@@ -36,7 +36,7 @@ export const diretores = [
     delegacia: "",
     foto: null,
     bio: "Garante a gestão financeira responsável e transparente dos recursos do sindicato, com prestação de contas periódica aos filiados.",
-    whatsapp: "5521999990004",
+    whatsapp: "5521964450123",
     instagram: "",
   },
   {
@@ -46,7 +46,7 @@ export const diretores = [
     delegacia: "",
     foto: null,
     bio: "Especialista em defesa dos direitos dos servidores, com atuação em processos administrativos, cíveis e trabalhistas.",
-    whatsapp: "5521999990005",
+    whatsapp: "5521969676701",
     instagram: "",
   },
   {
@@ -56,7 +56,7 @@ export const diretores = [
     delegacia: "",
     foto: null,
     bio: "Responsável pelo diálogo com o governo, demais sindicatos e instituições, fortalecendo a voz do policial civil nas negociações.",
-    whatsapp: "5521999990006",
+    whatsapp: "5521999973704",
     instagram: "",
   },
   {
@@ -66,7 +66,7 @@ export const diretores = [
     delegacia: "",
     foto: null,
     bio: "Defensor dos policiais que já cumpriram sua missão. Luta pela manutenção dos direitos previdenciários e benefícios dos inativos e pensionistas.",
-    whatsapp: "5521999990007",
+    whatsapp: "5521964632221",
     instagram: "",
   },
   {
@@ -76,7 +76,7 @@ export const diretores = [
     delegacia: "",
     foto: null,
     bio: "Representa os policiais das delegacias do interior do estado, garantindo que as demandas do interior sejam ouvidas e atendidas com a mesma prioridade da capital.",
-    whatsapp: "5521999990008",
+    whatsapp: "5521964342752",
     instagram: "",
   },
   {
@@ -86,7 +86,7 @@ export const diretores = [
     delegacia: "",
     foto: null,
     bio: "Especialista na estrutura de cargos da Polícia Civil. Trabalha pelo reconhecimento das atribuições de cada função e pela valorização de todas as carreiras.",
-    whatsapp: "5521999990009",
+    whatsapp: "5521988216017",
     instagram: "",
   },
 ]
