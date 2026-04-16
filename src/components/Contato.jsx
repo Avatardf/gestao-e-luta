@@ -1,32 +1,5 @@
 import { useState } from 'react'
-import { MessageCircle, Instagram, Mail, Phone, Send, CheckCircle2 } from 'lucide-react'
-
-const contatos = [
-  {
-    icon: MessageCircle,
-    label: 'WhatsApp',
-    valor: '(21) 9 9999-0000',
-    desc: 'Atendimento de seg a sex, 9h–18h',
-    href: 'https://wa.me/5521999990000?text=Ol%C3%A1%2C+quero+saber+mais+sobre+a+chapa+Gest%C3%A3o+e+Luta!',
-    cor: 'hover:text-green-400 hover:border-green-400/40',
-  },
-  {
-    icon: Instagram,
-    label: 'Instagram',
-    valor: '@gestaoluta_sindpol',
-    desc: 'Acompanhe nossa campanha',
-    href: 'https://instagram.com/gestaoluta_sindpol',
-    cor: 'hover:text-pink-400 hover:border-pink-400/40',
-  },
-  {
-    icon: Mail,
-    label: 'E-mail',
-    valor: 'contato@gestaoluta.com.br',
-    desc: 'Resposta em até 48h',
-    href: 'mailto:contato@gestaoluta.com.br',
-    cor: 'hover:text-blue-400 hover:border-blue-400/40',
-  },
-]
+import { Send, CheckCircle2 } from 'lucide-react'
 
 export default function Contato() {
   const [form, setForm] = useState({ nome: '', matricula: '', email: '', mensagem: '' })
@@ -57,39 +30,7 @@ export default function Contato() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Contact channels */}
-          <div>
-            <h3 className="font-heading text-xl text-white tracking-widest mb-6">Canais diretos</h3>
-            <div className="space-y-4 mb-10">
-              {contatos.map((c) => (
-                <a
-                  key={c.label}
-                  href={c.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`flex items-center gap-4 p-4 border border-navy-700 bg-navy-950 transition-all duration-200 group ${c.cor}`}
-                >
-                  <div className="w-10 h-10 bg-navy-800 flex items-center justify-center flex-shrink-0 group-hover:bg-navy-700 transition-colors">
-                    <c.icon size={18} className="text-gold-500" />
-                  </div>
-                  <div>
-                    <div className="font-heading text-white text-sm tracking-widest">{c.label}</div>
-                    <div className="text-gray-300 text-sm">{c.valor}</div>
-                    <div className="text-gray-500 text-xs">{c.desc}</div>
-                  </div>
-                </a>
-              ))}
-            </div>
-
-            {/* Map / location */}
-            <div className="border border-navy-700 bg-navy-950 p-5">
-              <p className="font-heading text-gold-500 text-xs tracking-widest uppercase mb-2">Sede da campanha</p>
-              <p className="text-gray-300 text-sm">Av. Presidente Vargas, 1997 · Centro</p>
-              <p className="text-gray-500 text-xs">Rio de Janeiro — RJ</p>
-            </div>
-          </div>
-
+        <div className="max-w-2xl mx-auto">
           {/* Message form */}
           <div>
             <h3 className="font-heading text-xl text-white tracking-widest mb-6">Envie uma mensagem</h3>
@@ -185,5 +126,6 @@ export default function Contato() {
         </div>
       </div>
     </section>
+
   )
 }
