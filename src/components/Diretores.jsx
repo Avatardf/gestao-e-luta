@@ -46,7 +46,7 @@ export default function Diretores() {
                 {/* Social links */}
                 <div className="flex gap-3 mt-4 pt-4 border-t border-navy-700">
                   <a
-                    href={`https://wa.me/${d.whatsapp}?text=Ol%C3%A1%2C+quero+saber+mais+sobre+a+chapa+Gest%C3%A3o+e+Luta!`}
+                    href={`https://wa.me/${d.whatsapp}?text=${encodeURIComponent(`Olá, ${d.nome.split(' ')[0]}! Vi o seu perfil no site da chapa Gestão e Luta (gestao-e-luta.vercel.app) e gostaria de conversar sobre a eleição do Sindpol-RJ. Conto com vocês!`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-green-400 transition-colors font-heading tracking-wide"
