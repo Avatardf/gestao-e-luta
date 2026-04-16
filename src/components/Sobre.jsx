@@ -17,7 +17,7 @@ export default function Sobre() {
             </h2>
             <span className="gold-line" />
             <p className="text-gray-300 leading-relaxed mb-4">
-              A chapa <strong className="text-white font-heading tracking-wide">GESTÃO &amp; LUTA</strong> foi construída contemplando todos os cargos e gerações da Polícia Civil. Aqui estão policiais mais novos e os mais experientes — investigadores, oficiais de polícia — reunidos num consenso sobre os rumos que o sindicato e a polícia devem seguir.
+              A chapa <strong className="text-white font-heading tracking-wide">GESTÃO &amp; LUTA</strong> foi construída contemplando todos os cargos e gerações da Polícia Civil. Aqui estão policiais mais novos e os mais experientes — todos reunidos num consenso sobre os rumos que o sindicato e a polícia devem seguir.
             </p>
             <p className="text-gray-300 leading-relaxed mb-4">
               <span className="text-gold-400 font-heading tracking-wide">Você conhece o nosso trabalho. Você nos viu trabalhando.</span> O nosso compromisso agora é maior. Nós sabemos fazer, já fizemos, e vamos fazer muito mais agora que estamos melhor estruturados.
