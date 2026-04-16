@@ -45,9 +45,9 @@ export default function Propostas() {
         {/* Download CTA */}
         <div className="mt-16 text-center">
           <div className="inline-block border border-gold-500/30 bg-gold-500/5 px-8 py-6">
-            <p className="text-slate-700 dark:text-gray-300 text-sm mb-4">Baixe o programa completo de governo da chapa</p>
+            <p className="text-slate-700 dark:text-gray-300 text-sm mb-4">Conheça as Propostas da Chapa 3</p>
             <button className="btn-primary">
-              Download do Programa
+              Faça o Download
             </button>
           </div>
         </div>
