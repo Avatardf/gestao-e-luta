@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
-import { Shield, RefreshCw, Trash2, LogOut, Loader2, Users, Vote, MapPin, Clock, Edit2, Save, X, ChevronDown, ChevronUp } from 'lucide-react'
+import { Shield, RefreshCw, Trash2, LogOut, Loader2, Users, Vote, MapPin, Clock, Edit2, Save, X, ChevronDown, ChevronUp, Camera } from 'lucide-react'
 
 const META       = 600
 const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASSWORD || 'gestao2025'
@@ -12,9 +12,11 @@ function fmt(dateStr) {
 
 // ── Editor de um diretor ────────────────────────────────────────
 function DirectorEditor({ director, onSaved }) {
-  const [open, setOpen]     = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [form, setForm]     = useState({
+  const [open, setOpen]         = useState(false)
+  const [saving, setSaving]     = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef            = useRef(null)
+  const [form, setForm]         = useState({
     nome:      director.nome      || '',
     cargo:     director.cargo     || '',
     delegacia: director.delegacia || '',
@@ -22,9 +24,27 @@ function DirectorEditor({ director, onSaved }) {
     bio:       director.bio       || '',
     whatsapp:  director.whatsapp  || '',
     instagram: director.instagram || '',
+    foto:      director.foto      || '',
   })
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
+
+  async function handlePhotoUpload(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    setUploading(true)
+    const ext  = file.name.split('.').pop()
+    const path = `director-${director.id}-${Date.now()}.${ext}`
+    const { error: upErr } = await supabase.storage
+      .from('director-photos')
+      .upload(path, file, { upsert: true })
+    if (upErr) { alert('Erro no upload: ' + upErr.message); setUploading(false); return }
+    const { data: { publicUrl } } = supabase.storage
+      .from('director-photos')
+      .getPublicUrl(path)
+    setForm(f => ({ ...f, foto: publicUrl }))
+    setUploading(false)
+  }
 
   async function handleSave() {
     setSaving(true)
@@ -61,6 +81,47 @@ function DirectorEditor({ director, onSaved }) {
       {/* Edit form */}
       {open && (
         <div className="border-t border-navy-700 p-5 space-y-4">
+
+          {/* Foto */}
+          <div>
+            <label className="block font-heading text-xs text-gray-500 uppercase tracking-widest mb-2">Foto</label>
+            <div className="flex items-center gap-4">
+              <div className="w-20 h-20 bg-navy-800 border border-navy-700 flex-shrink-0 overflow-hidden flex items-center justify-center">
+                {form.foto
+                  ? <img src={form.foto} alt="" className="w-full h-full object-cover object-top" />
+                  : <span className="font-heading text-xl text-gold-400">{initials}</span>
+                }
+              </div>
+              <div className="flex flex-col gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handlePhotoUpload}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="flex items-center gap-2 bg-navy-800 border border-navy-700 text-gray-300 hover:text-white hover:border-gold-500 transition-colors font-heading text-xs uppercase tracking-widest px-4 py-2"
+                >
+                  {uploading ? <Loader2 size={13} className="animate-spin" /> : <Camera size={13} />}
+                  {uploading ? 'Enviando…' : 'Escolher foto'}
+                </button>
+                {form.foto && (
+                  <button
+                    type="button"
+                    onClick={() => setForm(f => ({ ...f, foto: '' }))}
+                    className="flex items-center gap-2 text-red-400 hover:text-red-300 transition-colors font-heading text-xs uppercase tracking-widest"
+                  >
+                    <X size={13} /> Remover foto
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block font-heading text-xs text-gray-500 uppercase tracking-widest mb-1.5">Nome</label>
