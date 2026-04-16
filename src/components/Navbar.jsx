@@ -58,10 +58,12 @@ export default function Navbar() {
             {/* Theme toggle */}
             <button
               onClick={toggle}
-              className="w-8 h-8 flex items-center justify-center text-slate-500 dark:text-gray-400 hover:text-gold-500 dark:hover:text-gold-500 transition-colors"
-              title={dark ? 'Modo claro' : 'Modo escuro'}
+              className="flex items-center gap-1.5 text-slate-500 dark:text-gray-400 hover:text-gold-500 dark:hover:text-gold-500 transition-colors"
             >
-              {dark ? <Sun size={16} /> : <Moon size={16} />}
+              {dark ? <Sun size={14} /> : <Moon size={14} />}
+              <span className="font-heading text-xs tracking-widest uppercase">
+                {dark ? 'Claro' : 'Escuro'}
+              </span>
             </button>
           </div>
 
@@ -69,10 +71,12 @@ export default function Navbar() {
           <div className="md:hidden flex items-center gap-2">
             <button
               onClick={toggle}
-              className="w-8 h-8 flex items-center justify-center text-slate-500 dark:text-gray-400 hover:text-gold-500 transition-colors"
-              title={dark ? 'Modo claro' : 'Modo escuro'}
+              className="flex items-center gap-1.5 text-slate-500 dark:text-gray-400 hover:text-gold-500 transition-colors"
             >
-              {dark ? <Sun size={16} /> : <Moon size={16} />}
+              {dark ? <Sun size={14} /> : <Moon size={14} />}
+              <span className="font-heading text-xs tracking-widest uppercase">
+                {dark ? 'Claro' : 'Escuro'}
+              </span>
             </button>
             <button
               className="text-slate-700 dark:text-white hover:text-gold-500 transition-colors"
