@@ -30,7 +30,7 @@ function Carrossel({ itens }) {
   }
 
   if (total === 0) return (
-    <div className="text-center py-16 text-gray-500 text-sm">
+    <div className="text-center py-16 text-slate-500 dark:text-gray-500 text-sm">
       Nenhum depoimento ainda. Seja o primeiro!
     </div>
   )
@@ -40,13 +40,13 @@ function Carrossel({ itens }) {
   return (
     <div className="relative">
       {/* Card */}
-      <div className="bg-navy-900 border border-navy-700 p-8 md:p-12 text-center min-h-[220px] flex flex-col justify-center">
+      <div className="bg-slate-50 border border-slate-200 dark:bg-navy-900 dark:border-navy-700 p-8 md:p-12 text-center min-h-[220px] flex flex-col justify-center">
         <Quote className="text-gold-500/40 mx-auto mb-4" size={36} />
-        <p className="text-gray-200 text-base md:text-lg leading-relaxed italic max-w-2xl mx-auto">
+        <p className="text-slate-700 dark:text-gray-200 text-base md:text-lg leading-relaxed italic max-w-2xl mx-auto">
           "{d.texto}"
         </p>
         <div className="mt-6">
-          <p className="font-heading text-white tracking-widest text-sm">{d.nome}</p>
+          <p className="font-heading text-slate-900 dark:text-white tracking-widest text-sm">{d.nome}</p>
           {d.lotacao && <p className="text-gold-500 text-xs font-heading tracking-widest uppercase mt-1">{d.lotacao}</p>}
         </div>
       </div>
@@ -56,13 +56,13 @@ function Carrossel({ itens }) {
         <>
           <button
             onClick={() => { voltar(); reiniciarTimer() }}
-            className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-navy-800 border border-navy-700 hover:border-gold-500 text-gray-400 hover:text-gold-500 flex items-center justify-center transition-colors"
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-white border border-slate-200 dark:bg-navy-800 dark:border-navy-700 hover:border-gold-500 text-slate-500 dark:text-gray-400 hover:text-gold-500 flex items-center justify-center transition-colors"
           >
             <ChevronLeft size={18} />
           </button>
           <button
             onClick={() => { avancar(); reiniciarTimer() }}
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-navy-800 border border-navy-700 hover:border-gold-500 text-gray-400 hover:text-gold-500 flex items-center justify-center transition-colors"
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-white border border-slate-200 dark:bg-navy-800 dark:border-navy-700 hover:border-gold-500 text-slate-500 dark:text-gray-400 hover:text-gold-500 flex items-center justify-center transition-colors"
           >
             <ChevronRight size={18} />
           </button>
@@ -76,7 +76,7 @@ function Carrossel({ itens }) {
             <button
               key={i}
               onClick={() => { setIdx(i); reiniciarTimer() }}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${i === idx ? 'bg-gold-500 w-5' : 'bg-navy-700'}`}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${i === idx ? 'bg-gold-500 w-5' : 'bg-slate-300 dark:bg-navy-700'}`}
             />
           ))}
         </div>
@@ -114,29 +114,29 @@ function FormDepoimento({ onEnviado }) {
     <form onSubmit={handleSubmit} className="space-y-4 max-w-xl mx-auto">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block font-heading text-xs text-gray-400 uppercase tracking-widest mb-1.5">Nome *</label>
+          <label className="block font-heading text-xs text-slate-500 dark:text-gray-400 uppercase tracking-widest mb-1.5">Nome *</label>
           <input
             name="nome"
             value={form.nome}
             onChange={handleChange}
             required
             placeholder="Seu nome"
-            className="w-full bg-navy-900 border border-navy-700 text-white px-4 py-3 text-sm focus:outline-none focus:border-gold-500 transition-colors placeholder-navy-600"
+            className="w-full bg-white dark:bg-navy-900 border border-slate-200 dark:border-navy-700 text-slate-900 dark:text-white px-4 py-3 text-sm focus:outline-none focus:border-gold-500 transition-colors placeholder-slate-400 dark:placeholder-navy-600"
           />
         </div>
         <div>
-          <label className="block font-heading text-xs text-gray-400 uppercase tracking-widest mb-1.5">Lotação</label>
+          <label className="block font-heading text-xs text-slate-500 dark:text-gray-400 uppercase tracking-widest mb-1.5">Lotação</label>
           <input
             name="lotacao"
             value={form.lotacao}
             onChange={handleChange}
             placeholder="Ex: 10ª DP"
-            className="w-full bg-navy-900 border border-navy-700 text-white px-4 py-3 text-sm focus:outline-none focus:border-gold-500 transition-colors placeholder-navy-600"
+            className="w-full bg-white dark:bg-navy-900 border border-slate-200 dark:border-navy-700 text-slate-900 dark:text-white px-4 py-3 text-sm focus:outline-none focus:border-gold-500 transition-colors placeholder-slate-400 dark:placeholder-navy-600"
           />
         </div>
       </div>
       <div>
-        <label className="block font-heading text-xs text-gray-400 uppercase tracking-widest mb-1.5">Depoimento *</label>
+        <label className="block font-heading text-xs text-slate-500 dark:text-gray-400 uppercase tracking-widest mb-1.5">Depoimento *</label>
         <textarea
           name="texto"
           value={form.texto}
@@ -144,9 +144,9 @@ function FormDepoimento({ onEnviado }) {
           required
           rows={4}
           placeholder="Escreva seu apoio à chapa Gestão e Luta..."
-          className="w-full bg-navy-900 border border-navy-700 text-white px-4 py-3 text-sm focus:outline-none focus:border-gold-500 transition-colors placeholder-navy-600 resize-none"
+          className="w-full bg-white dark:bg-navy-900 border border-slate-200 dark:border-navy-700 text-slate-900 dark:text-white px-4 py-3 text-sm focus:outline-none focus:border-gold-500 transition-colors placeholder-slate-400 dark:placeholder-navy-600 resize-none"
         />
-        <p className={`text-xs mt-1 text-right ${form.texto.length >= LIMITE ? 'text-red-400' : 'text-gray-600'}`}>
+        <p className={`text-xs mt-1 text-right ${form.texto.length >= LIMITE ? 'text-red-400' : 'text-slate-400 dark:text-gray-600'}`}>
           {form.texto.length}/{LIMITE}
         </p>
       </div>
@@ -186,13 +186,13 @@ export default function Depoimentos() {
   }
 
   return (
-    <section id="depoimentos" className="py-24 bg-navy-950">
+    <section id="depoimentos" className="py-24 bg-white dark:bg-navy-950">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <p className="font-heading text-gold-500 text-sm tracking-widest uppercase mb-2">Quem apoia</p>
           <h2 className="section-title">Depoimentos</h2>
           <span className="gold-line mx-auto" />
-          <p className="text-gray-400 max-w-xl mx-auto text-sm leading-relaxed">
+          <p className="text-slate-600 dark:text-gray-400 max-w-xl mx-auto text-sm leading-relaxed">
             Policiais civis de todo o estado manifestando seu apoio à chapa Gestão e Luta.
           </p>
         </div>
@@ -206,13 +206,13 @@ export default function Depoimentos() {
         )}
 
         {/* Form */}
-        <div className="mt-16 border-t border-navy-800 pt-16">
-          <h3 className="font-heading text-xl text-white tracking-widest text-center mb-8">Deixe seu depoimento</h3>
+        <div className="mt-16 border-t border-slate-100 dark:border-navy-800 pt-16">
+          <h3 className="font-heading text-xl text-slate-900 dark:text-white tracking-widest text-center mb-8">Deixe seu depoimento</h3>
           {enviado ? (
             <div className="bg-gold-500/10 border border-gold-500/40 p-8 text-center max-w-xl mx-auto">
               <CheckCircle2 className="text-gold-500 mx-auto mb-3" size={36} />
-              <p className="font-heading text-white tracking-widest mb-2">Depoimento enviado!</p>
-              <p className="text-gray-400 text-sm">Obrigado pelo seu apoio, companheiro!</p>
+              <p className="font-heading text-slate-900 dark:text-white tracking-widest mb-2">Depoimento enviado!</p>
+              <p className="text-slate-600 dark:text-gray-400 text-sm">Obrigado pelo seu apoio, companheiro!</p>
               <button onClick={() => setEnviado(false)} className="mt-5 btn-outline text-sm">
                 Enviar outro
               </button>

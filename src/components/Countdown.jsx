@@ -20,10 +20,10 @@ function getTimeLeft() {
 function Unit({ value, label }) {
   return (
     <div className="flex flex-col items-center">
-      <div className="bg-navy-900 border border-navy-700 px-4 py-3 min-w-[64px] text-center">
+      <div className="bg-slate-100 border border-slate-200 dark:bg-navy-900 dark:border-navy-700 px-4 py-3 min-w-[64px] text-center">
         <span className="font-heading text-3xl md:text-4xl text-gold-400">{pad(value)}</span>
       </div>
-      <span className="font-heading text-xs text-gray-500 tracking-widest uppercase mt-2">{label}</span>
+      <span className="font-heading text-xs text-slate-500 dark:text-gray-500 tracking-widest uppercase mt-2">{label}</span>
     </div>
   )
 }
@@ -46,7 +46,7 @@ export default function Countdown() {
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <p className="font-heading text-xs text-gray-500 tracking-widest uppercase">Eleição começa em</p>
+      <p className="font-heading text-xs text-slate-500 dark:text-gray-500 tracking-widest uppercase">Eleição começa em</p>
       <div className="flex items-start gap-3 md:gap-5">
         <Unit value={time.days}    label="Dias" />
         <span className="text-gold-500 text-2xl font-heading mt-3">:</span>

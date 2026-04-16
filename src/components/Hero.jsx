@@ -3,7 +3,7 @@ import Countdown from './Countdown'
 
 export default function Hero() {
   return (
-    <section id="hero" className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-navy-950">
+    <section id="hero" className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-white dark:bg-navy-950">
       {/* Background pattern */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute inset-0" style={{
@@ -18,7 +18,7 @@ export default function Hero() {
       </div>
 
       {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-navy-950/60 via-transparent to-navy-950" />
+      <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-transparent to-white dark:from-navy-950/60 dark:via-transparent dark:to-navy-950" />
 
       {/* Gold accent bar */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
@@ -29,13 +29,13 @@ export default function Hero() {
         <div className="inline-flex items-center gap-2 border border-gold-500/40 bg-gold-500/10 px-4 py-1.5 mb-8">
           <span className="w-2 h-2 bg-gold-500 rounded-full pulse-gold inline-block" />
           <span className="font-heading text-gold-400 text-xs tracking-widest uppercase">
-            Eleição Sindpol-RJ · Chapa Nº 3
+            Eleição Sindpol-RJ · Chapa Nº 2
           </span>
         </div>
 
         {/* Main title */}
         <h1
-          className="font-heading font-bold uppercase text-white leading-none mb-4"
+          className="font-heading font-bold uppercase text-slate-900 dark:text-white leading-none mb-4"
           style={{ fontSize: 'clamp(3.5rem, 12vw, 9rem)', letterSpacing: '0.08em' }}
         >
           GESTÃO
@@ -50,7 +50,7 @@ export default function Hero() {
         </div>
 
         {/* Slogan */}
-        <p className="font-heading text-gray-300 tracking-widest text-sm md:text-base uppercase mb-12">
+        <p className="font-heading text-slate-600 dark:text-gray-300 tracking-widest text-sm md:text-base uppercase mb-12">
           Transparência · Compromisso · Resultado
         </p>
 

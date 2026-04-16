@@ -7,24 +7,24 @@ import { generateShareImage } from '../utils/generateShareImage'
 const META = 600
 
 const chapas = [
-  { id: 2, nome: 'Chapa 1', descricao: 'Outra proposta de gestão', destaque: false },
-  { id: 3, nome: 'Chapa 2', descricao: 'Outra proposta de gestão', destaque: false },
   { id: 1, nome: 'GESTÃO E LUTA', descricao: 'Transparência · Compromisso · Resultado', destaque: true },
+  { id: 2, nome: 'Chapa A',        descricao: 'Outra proposta de gestão', destaque: false },
+  { id: 3, nome: 'Chapa B',        descricao: 'Outra proposta de gestão', destaque: false },
 ]
 
 function Termometro({ total }) {
   const pct = Math.min(Math.round((total / META) * 100), 100)
   const cor = pct >= 100 ? 'bg-green-500' : pct >= 60 ? 'bg-gold-500' : 'bg-blue-500'
   return (
-    <div className="mb-8 p-5 bg-navy-900 border border-navy-700">
+    <div className="mb-8 p-5 bg-slate-50 border border-slate-200 dark:bg-navy-900 dark:border-navy-700">
       <div className="flex justify-between items-end mb-2">
-        <span className="font-heading text-xs text-gray-400 tracking-widest uppercase">Termômetro da vitória</span>
-        <span className="font-heading text-2xl text-gold-400">{total}<span className="text-gray-500 text-sm">/{META}</span></span>
+        <span className="font-heading text-xs text-slate-500 dark:text-gray-400 tracking-widest uppercase">Termômetro da vitória</span>
+        <span className="font-heading text-2xl text-gold-400">{total}<span className="text-slate-400 dark:text-gray-500 text-sm">/{META}</span></span>
       </div>
-      <div className="h-3 bg-navy-800 overflow-hidden">
+      <div className="h-3 bg-slate-200 dark:bg-navy-800 overflow-hidden">
         <div className={`h-full transition-all duration-700 ${cor}`} style={{ width: `${pct}%` }} />
       </div>
-      <p className="text-gray-500 text-xs mt-2">
+      <p className="text-slate-500 dark:text-gray-500 text-xs mt-2">
         {pct >= 100
           ? '✅ Meta atingida! Seguimos em frente!'
           : `Faltam ${META - total} votos para atingir a meta de ${META}`}
@@ -35,13 +35,13 @@ function Termometro({ total }) {
 
 export default function SimulacaoVoto() {
   const visitor = useVisitor()
-  const [selected, setSelected]   = useState(null)
-  const [voted, setVoted]         = useState(false)
-  const [alreadyVoted, setAlready]= useState(false)
-  const [loading, setLoading]     = useState(true)
-  const [submitting, setSubmit]   = useState(false)
-  const [counts, setCounts]       = useState({ 1: 0, 2: 0, 3: 0 })
-  const [total, setTotal]         = useState(0)
+  const [selected, setSelected]    = useState(null)
+  const [voted, setVoted]          = useState(false)
+  const [alreadyVoted, setAlready] = useState(false)
+  const [loading, setLoading]      = useState(true)
+  const [submitting, setSubmit]    = useState(false)
+  const [counts, setCounts]        = useState({ 1: 0, 2: 0, 3: 0 })
+  const [total, setTotal]          = useState(0)
 
   useEffect(() => {
     loadVotes()
@@ -58,7 +58,7 @@ export default function SimulacaoVoto() {
       const c = { 1: 0, 2: 0, 3: 0 }
       data.forEach(v => { c[v.chapa_id] = (c[v.chapa_id] || 0) + 1 })
       setCounts(c)
-      setTotal(c[1]) // termômetro conta apenas votos da nossa chapa
+      setTotal(c[1])
     }
     setLoading(false)
   }
@@ -113,7 +113,6 @@ export default function SimulacaoVoto() {
       } else if (navigator.share) {
         await navigator.share({ title: 'GESTÃO E LUTA — Sindpol-RJ', text, url })
       } else {
-        // Fallback: download the image + copy link
         const a = document.createElement('a')
         a.href = URL.createObjectURL(imageFile)
         a.download = 'gestao-e-luta-apoio.png'
@@ -131,7 +130,7 @@ export default function SimulacaoVoto() {
   }
 
   return (
-    <section id="votacao" className="py-24 bg-navy-950 relative overflow-hidden">
+    <section id="votacao" className="py-24 bg-white dark:bg-navy-950 relative overflow-hidden">
       <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none select-none">
         <span className="font-heading text-[20rem] text-gold-500 leading-none">X</span>
       </div>
@@ -141,7 +140,7 @@ export default function SimulacaoVoto() {
           <p className="font-heading text-gold-500 text-sm tracking-widest uppercase mb-2">Participe</p>
           <h2 className="section-title">Simule seu Voto</h2>
           <span className="gold-line mx-auto" />
-          <p className="text-gray-400 max-w-xl mx-auto text-sm leading-relaxed">
+          <p className="text-slate-600 dark:text-gray-400 max-w-xl mx-auto text-sm leading-relaxed">
             Esta é uma simulação não-oficial para medir o apoio dos filiados. Seu voto real ocorrerá na urna durante o período eleitoral.
           </p>
         </div>
@@ -162,20 +161,24 @@ export default function SimulacaoVoto() {
                     onClick={() => setSelected(c.id)}
                     className={`w-full text-left p-5 border-2 transition-all duration-200 flex items-center gap-4 ${
                       selected === c.id
-                        ? c.destaque ? 'border-gold-500 bg-gold-500/10' : 'border-navy-500 bg-navy-800'
-                        : 'border-navy-700 bg-navy-900 hover:border-navy-500'
+                        ? c.destaque
+                          ? 'border-gold-500 bg-gold-500/10'
+                          : 'border-slate-400 bg-slate-100 dark:border-navy-500 dark:bg-navy-800'
+                        : 'border-slate-200 bg-white hover:border-slate-400 dark:border-navy-700 dark:bg-navy-900 dark:hover:border-navy-500'
                     }`}
                   >
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                      selected === c.id ? c.destaque ? 'border-gold-500' : 'border-gray-400' : 'border-navy-600'
+                      selected === c.id
+                        ? c.destaque ? 'border-gold-500' : 'border-slate-500 dark:border-gray-400'
+                        : 'border-slate-300 dark:border-navy-600'
                     }`}>
                       {selected === c.id && (
-                        <div className={`w-2.5 h-2.5 rounded-full ${c.destaque ? 'bg-gold-500' : 'bg-gray-400'}`} />
+                        <div className={`w-2.5 h-2.5 rounded-full ${c.destaque ? 'bg-gold-500' : 'bg-slate-500 dark:bg-gray-400'}`} />
                       )}
                     </div>
                     <div className="flex-1">
-                      <div className={`font-heading text-lg tracking-widest ${c.destaque ? 'text-gold-400' : 'text-white'}`}>{c.nome}</div>
-                      <div className="text-gray-400 text-xs mt-0.5">{c.descricao}</div>
+                      <div className={`font-heading text-lg tracking-widest ${c.destaque ? 'text-gold-400' : 'text-slate-900 dark:text-white'}`}>{c.nome}</div>
+                      <div className="text-slate-500 dark:text-gray-400 text-xs mt-0.5">{c.descricao}</div>
                     </div>
                     {c.destaque && (
                       <span className="bg-gold-500 text-navy-950 font-heading text-xs px-2 py-0.5 tracking-wider">NOSSA CHAPA</span>
@@ -187,7 +190,9 @@ export default function SimulacaoVoto() {
                   onClick={handleVote}
                   disabled={!selected || submitting || !visitor}
                   className={`w-full mt-4 flex items-center justify-center gap-3 py-4 font-heading text-sm uppercase tracking-widest transition-all duration-200 ${
-                    selected && visitor ? 'bg-gold-500 text-navy-950 hover:bg-gold-400 cursor-pointer' : 'bg-navy-800 text-navy-600 cursor-not-allowed'
+                    selected && visitor
+                      ? 'bg-gold-500 text-navy-950 hover:bg-gold-400 cursor-pointer'
+                      : 'bg-slate-200 text-slate-400 cursor-not-allowed dark:bg-navy-800 dark:text-navy-600'
                   }`}
                 >
                   {submitting ? <Loader2 size={18} className="animate-spin" /> : <Vote size={18} />}
@@ -195,7 +200,7 @@ export default function SimulacaoVoto() {
                 </button>
 
                 {!visitor && (
-                  <p className="text-center text-gray-600 text-xs">Detectando sua localização...</p>
+                  <p className="text-center text-slate-400 dark:text-gray-600 text-xs">Detectando sua localização...</p>
                 )}
               </div>
             ) : (
@@ -205,10 +210,10 @@ export default function SimulacaoVoto() {
                     ? <AlertCircle className="text-blue-400 flex-shrink-0" size={22} />
                     : <CheckCircle2 className="text-gold-500 flex-shrink-0" size={22} />}
                   <div>
-                    <p className="font-heading text-white tracking-wide">
+                    <p className="font-heading text-slate-900 dark:text-white tracking-wide">
                       {alreadyVoted ? 'Você já votou anteriormente!' : 'Voto registrado!'}
                     </p>
-                    <p className="text-gray-400 text-xs mt-0.5">
+                    <p className="text-slate-500 dark:text-gray-400 text-xs mt-0.5">
                       {alreadyVoted
                         ? 'Seu IP já consta na nossa base. Lembre-se de votar na urna oficial!'
                         : 'Obrigado! Lembre-se de votar na urna oficial no dia da eleição.'}
@@ -217,18 +222,18 @@ export default function SimulacaoVoto() {
                 </div>
 
                 {chapas.map((c) => (
-                  <div key={c.id} className={`p-4 border ${c.id === selected || (alreadyVoted && c.id === 1) ? 'border-gold-500/40 bg-gold-500/5' : 'border-navy-700 bg-navy-900'}`}>
+                  <div key={c.id} className={`p-4 border ${c.id === selected || (alreadyVoted && c.id === 1) ? 'border-gold-500/40 bg-gold-500/5' : 'border-slate-200 bg-white dark:border-navy-700 dark:bg-navy-900'}`}>
                     <div className="flex items-center justify-between mb-2">
-                      <span className={`font-heading text-sm tracking-widest ${c.destaque ? 'text-gold-400' : 'text-white'}`}>{c.nome}</span>
-                      <span className="font-heading text-lg text-white">{pct(c.id)}%</span>
+                      <span className={`font-heading text-sm tracking-widest ${c.destaque ? 'text-gold-400' : 'text-slate-900 dark:text-white'}`}>{c.nome}</span>
+                      <span className="font-heading text-lg text-slate-900 dark:text-white">{pct(c.id)}%</span>
                     </div>
-                    <div className="h-2 bg-navy-800 overflow-hidden">
+                    <div className="h-2 bg-slate-200 dark:bg-navy-800 overflow-hidden">
                       <div
-                        className={`h-full transition-all duration-700 ${c.destaque ? 'bg-gold-500' : 'bg-navy-500'}`}
+                        className={`h-full transition-all duration-700 ${c.destaque ? 'bg-gold-500' : 'bg-slate-400 dark:bg-navy-500'}`}
                         style={{ width: `${pct(c.id)}%` }}
                       />
                     </div>
-                    <p className="text-gray-500 text-xs mt-1">{(counts[c.id] || 0).toLocaleString('pt-BR')} votos</p>
+                    <p className="text-slate-500 dark:text-gray-500 text-xs mt-1">{(counts[c.id] || 0).toLocaleString('pt-BR')} votos</p>
                   </div>
                 ))}
 
@@ -238,7 +243,7 @@ export default function SimulacaoVoto() {
                     {sharing ? 'Gerando imagem...' : 'Compartilhar apoio'}
                   </button>
                 ) : (
-                  <p className="text-center text-gray-600 text-xs pt-2">
+                  <p className="text-center text-slate-400 dark:text-gray-600 text-xs pt-2">
                     O compartilhamento está disponível apenas para quem apoia a chapa Gestão e Luta.
                   </p>
                 )}
@@ -247,7 +252,7 @@ export default function SimulacaoVoto() {
           </>
         )}
 
-        <p className="text-center text-gray-600 text-xs">
+        <p className="text-center text-slate-400 dark:text-gray-600 text-xs">
           * Simulação não-oficial. Cada IP pode votar uma vez. Não representa resultado eleitoral oficial.
         </p>
       </div>

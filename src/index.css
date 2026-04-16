@@ -8,7 +8,7 @@
   }
 
   body {
-    @apply bg-navy-950 text-white font-body;
+    @apply bg-white text-slate-900 dark:bg-navy-950 dark:text-white font-body;
   }
 
   h1, h2, h3, h4 {
@@ -18,7 +18,7 @@
 
 @layer components {
   .section-title {
-    @apply text-4xl md:text-5xl font-heading uppercase tracking-widest text-white;
+    @apply text-4xl md:text-5xl font-heading uppercase tracking-widest text-slate-900 dark:text-white;
   }
 
   .gold-line {
@@ -34,7 +34,7 @@
   }
 
   .card {
-    @apply bg-navy-900 border border-navy-700 p-6 hover:border-gold-500 transition-all duration-300;
+    @apply bg-white border border-slate-200 p-6 hover:border-gold-500 transition-all duration-300 dark:bg-navy-900 dark:border-navy-700;
   }
 }
 
@@ -43,11 +43,14 @@
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #071225;
+  background: #f1f5f9;
 }
 ::-webkit-scrollbar-thumb {
   background: #C9A227;
   border-radius: 3px;
+}
+.dark ::-webkit-scrollbar-track {
+  background: #071225;
 }
 
 /* Flip card */

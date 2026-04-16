@@ -25,7 +25,7 @@ function ModalNoticia({ noticia, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80" onClick={onClose}>
       <div
-        className="bg-navy-900 border border-navy-700 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+        className="bg-white dark:bg-navy-900 border border-slate-200 dark:border-navy-700 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         {noticia.imagem_url && (
@@ -33,23 +33,23 @@ function ModalNoticia({ noticia, onClose }) {
         )}
         <div className="p-8">
           <div className="flex items-center justify-between gap-4 mb-4">
-            <span className="text-gray-500 text-xs flex items-center gap-1.5">
+            <span className="text-slate-500 dark:text-gray-500 text-xs flex items-center gap-1.5">
               <Calendar size={12} /> {fmt(noticia.created_at)}
             </span>
             <div className="flex gap-2">
               <button
                 onClick={compartilhar}
-                className="flex items-center gap-1.5 text-gray-400 hover:text-gold-500 transition-colors font-heading text-xs uppercase tracking-widest"
+                className="flex items-center gap-1.5 text-slate-500 dark:text-gray-400 hover:text-gold-500 transition-colors font-heading text-xs uppercase tracking-widest"
               >
                 <Share2 size={13} /> Compartilhar
               </button>
-              <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors ml-2">
+              <button onClick={onClose} className="text-slate-400 dark:text-gray-500 hover:text-slate-900 dark:hover:text-white transition-colors ml-2">
                 <X size={18} />
               </button>
             </div>
           </div>
-          <h2 className="font-heading text-white text-xl tracking-wide leading-snug mb-4">{noticia.titulo}</h2>
-          <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">{noticia.conteudo}</p>
+          <h2 className="font-heading text-slate-900 dark:text-white text-xl tracking-wide leading-snug mb-4">{noticia.titulo}</h2>
+          <p className="text-slate-700 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">{noticia.conteudo}</p>
         </div>
       </div>
     </div>
@@ -70,27 +70,27 @@ function CardNoticia({ noticia, onClick }) {
 
   return (
     <div
-      className="bg-navy-900 border border-navy-700 hover:border-gold-500/40 transition-all duration-200 cursor-pointer group flex flex-col"
+      className="bg-white dark:bg-navy-900 border border-slate-200 dark:border-navy-700 hover:border-gold-500/40 transition-all duration-200 cursor-pointer group flex flex-col"
       onClick={onClick}
     >
       {noticia.imagem_url && (
         <img src={noticia.imagem_url} alt={noticia.titulo} className="w-full h-44 object-cover" />
       )}
       <div className="p-6 flex flex-col flex-1">
-        <span className="text-gray-500 text-xs flex items-center gap-1.5 mb-3">
+        <span className="text-slate-500 dark:text-gray-500 text-xs flex items-center gap-1.5 mb-3">
           <Calendar size={11} /> {fmt(noticia.created_at)}
         </span>
-        <h3 className="font-heading text-white tracking-wide text-base leading-snug mb-2 group-hover:text-gold-400 transition-colors">
+        <h3 className="font-heading text-slate-900 dark:text-white tracking-wide text-base leading-snug mb-2 group-hover:text-gold-400 transition-colors">
           {noticia.titulo}
         </h3>
-        <p className="text-gray-400 text-sm leading-relaxed flex-1 line-clamp-3">{noticia.resumo}</p>
-        <div className="mt-4 pt-4 border-t border-navy-700 flex items-center justify-between">
+        <p className="text-slate-600 dark:text-gray-400 text-sm leading-relaxed flex-1 line-clamp-3">{noticia.resumo}</p>
+        <div className="mt-4 pt-4 border-t border-slate-200 dark:border-navy-700 flex items-center justify-between">
           <span className="font-heading text-gold-500 text-xs uppercase tracking-widest flex items-center gap-1 group-hover:gap-2 transition-all">
             Ler mais <ChevronRight size={12} />
           </span>
           <button
             onClick={compartilhar}
-            className="text-gray-600 hover:text-gold-500 transition-colors"
+            className="text-slate-400 dark:text-gray-600 hover:text-gold-500 transition-colors"
             title="Compartilhar"
           >
             <Share2 size={14} />
@@ -121,7 +121,7 @@ export default function Noticias() {
   if (!loading && noticias.length === 0) return null
 
   return (
-    <section id="noticias" className="py-24 bg-navy-900">
+    <section id="noticias" className="py-24 bg-slate-50 dark:bg-navy-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <p className="font-heading text-gold-500 text-sm tracking-widest uppercase mb-2">Fique por dentro</p>
