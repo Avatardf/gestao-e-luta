@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { CheckCircle2, Vote, Share2, AlertCircle, Loader2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useVisitor } from '../hooks/useVisitor'
+import { generateShareImage } from '../utils/generateShareImage'
 
 const META = 600
 
@@ -97,13 +98,35 @@ export default function SimulacaoVoto() {
 
   const pct = (id) => total > 0 ? Math.round((counts[id] / total) * 100) : 0
 
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({ title: 'GESTÃO E LUTA — Sindpol-RJ', url: window.location.href })
-    } else {
-      navigator.clipboard.writeText(window.location.href)
-      alert('Link copiado!')
+  const [sharing, setSharing] = useState(false)
+
+  const handleShare = async () => {
+    setSharing(true)
+    try {
+      const url  = 'https://gestao-e-luta.vercel.app'
+      const text = 'Eu apoio a chapa GESTÃO E LUTA no Sindpol-RJ! Venha votar também!'
+      const imageFile = await generateShareImage()
+
+      if (navigator.share && navigator.canShare?.({ files: [imageFile] })) {
+        await navigator.share({ title: 'GESTÃO E LUTA — Sindpol-RJ', text, url, files: [imageFile] })
+      } else if (navigator.share) {
+        await navigator.share({ title: 'GESTÃO E LUTA — Sindpol-RJ', text, url })
+      } else {
+        // Fallback: download the image + copy link
+        const a = document.createElement('a')
+        a.href = URL.createObjectURL(imageFile)
+        a.download = 'gestao-e-luta-apoio.png'
+        a.click()
+        await navigator.clipboard.writeText(url)
+        alert('Imagem baixada e link copiado!')
+      }
+    } catch (e) {
+      if (e?.name !== 'AbortError') {
+        await navigator.clipboard.writeText('https://gestao-e-luta.vercel.app').catch(() => {})
+        alert('Link copiado!')
+      }
     }
+    setSharing(false)
   }
 
   return (
@@ -208,9 +231,9 @@ export default function SimulacaoVoto() {
                   </div>
                 ))}
 
-                <button onClick={handleShare} className="w-full btn-primary flex items-center justify-center gap-2">
-                  <Share2 size={16} />
-                  Compartilhar
+                <button onClick={handleShare} disabled={sharing} className="w-full btn-primary flex items-center justify-center gap-2">
+                  {sharing ? <Loader2 size={16} className="animate-spin" /> : <Share2 size={16} />}
+                  {sharing ? 'Gerando imagem...' : 'Compartilhar'}
                 </button>
               </div>
             )}
