@@ -41,8 +41,8 @@ export const propostas = [
     titulo: "Transição Segura para a Lei Orgânica Nacional",
     descricao: "A nova regulamentação não pode resultar em perda de direitos. Atuamos com medidas cautelares e minutas técnicas para preservar todas as conquistas.",
     pontos: [
-      "Criação do cargo de Oficial de Polícia",
-      "Preservação do índice 1250 para Comissários",
+      "Fortalecimento do cargo de Oficial de Polícia",
+      "Luta pelo índice 1250 para Comissários",
       "Incidência da GHP nos triênios",
       "Medidas cautelares preventivas",
     ],
