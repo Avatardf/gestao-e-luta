@@ -29,7 +29,7 @@ export default function Hero() {
         <div className="inline-flex items-center gap-2 border border-gold-500/40 bg-gold-500/10 px-4 py-1.5 mb-8">
           <span className="w-2 h-2 bg-gold-500 rounded-full pulse-gold inline-block" />
           <span className="font-heading text-gold-400 text-xs tracking-widest uppercase">
-            Eleição Sindpol-RJ · Chapa Nº 2
+            Eleição Sindpol-RJ · Chapa Nº 3
           </span>
         </div>
 

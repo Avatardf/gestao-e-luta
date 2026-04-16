@@ -7,9 +7,9 @@ import { generateShareImage } from '../utils/generateShareImage'
 const META = 600
 
 const chapas = [
+  { id: 2, nome: 'Chapa 1', descricao: 'Outra proposta de gestão', destaque: false },
+  { id: 3, nome: 'Chapa 2', descricao: 'Outra proposta de gestão', destaque: false },
   { id: 1, nome: 'GESTÃO E LUTA', descricao: 'Transparência · Compromisso · Resultado', destaque: true },
-  { id: 2, nome: 'Chapa A',        descricao: 'Outra proposta de gestão', destaque: false },
-  { id: 3, nome: 'Chapa B',        descricao: 'Outra proposta de gestão', destaque: false },
 ]
 
 function Termometro({ total }) {
