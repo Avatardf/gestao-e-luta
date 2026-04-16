@@ -58,7 +58,7 @@ export default function SimulacaoVoto() {
       const c = { 1: 0, 2: 0, 3: 0 }
       data.forEach(v => { c[v.chapa_id] = (c[v.chapa_id] || 0) + 1 })
       setCounts(c)
-      setTotal(data.length)
+      setTotal(c[1]) // termômetro conta apenas votos da nossa chapa
     }
     setLoading(false)
   }
@@ -90,13 +90,14 @@ export default function SimulacaoVoto() {
     } else {
       const newCounts = { ...counts, [selected]: (counts[selected] || 0) + 1 }
       setCounts(newCounts)
-      setTotal(total + 1)
+      if (selected === 1) setTotal(total + 1)
       setVoted(true)
     }
     setSubmit(false)
   }
 
-  const pct = (id) => total > 0 ? Math.round((counts[id] / total) * 100) : 0
+  const totalAll = Object.values(counts).reduce((a, b) => a + b, 0)
+  const pct = (id) => totalAll > 0 ? Math.round((counts[id] / totalAll) * 100) : 0
 
   const [sharing, setSharing] = useState(false)
 
