@@ -37,12 +37,15 @@ export async function generateShareImage() {
   ctx.lineWidth   = 3
   ctx.beginPath(); ctx.moveTo(160, 220); ctx.lineTo(W - 160, 220); ctx.stroke()
 
-  // ── GL monogram ───────────────────────────────────────────────
+  // ── Badge CHAPA 3 ─────────────────────────────────────────────
+  const badgeW = 220, badgeH = 52
   ctx.fillStyle = '#C9A227'
-  ctx.fillRect((W - 56) / 2, 248, 56, 56)
-  ctx.fillStyle = '#0D1F3C'
-  ctx.font      = 'bold 18px "Oswald", sans-serif'
-  ctx.fillText('CHAPA 3', W / 2, 283)
+  ctx.fillRect((W - badgeW) / 2, 248, badgeW, badgeH)
+  ctx.fillStyle    = '#0D1F3C'
+  ctx.font         = 'bold 30px "Oswald", sans-serif'
+  ctx.letterSpacing = '0.18em'
+  ctx.fillText('CHAPA  3', W / 2, 283)
+  ctx.letterSpacing = '0em'
 
   // ── GESTÃO (branco) ───────────────────────────────────────────
   ctx.fillStyle    = '#FFFFFF'
