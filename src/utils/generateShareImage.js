@@ -81,19 +81,58 @@ export async function generateShareImage() {
   ctx.font      = '500 22px "Oswald", sans-serif'
   ctx.fillText('SINDPOL-RJ — ELEIÇÕES 2025', W / 2, 837)
 
+  // ── Candidatos em destaque ────────────────────────────────────
+  ctx.strokeStyle = 'rgba(201,162,39,0.25)'
+  ctx.lineWidth   = 1
+  ctx.beginPath(); ctx.moveTo(120, 878); ctx.lineTo(W - 120, 878); ctx.stroke()
+
+  // Luiz Cláudio
+  ctx.fillStyle    = '#FFFFFF'
+  ctx.font         = 'bold 40px "Oswald", sans-serif'
+  ctx.letterSpacing = '0.04em'
+  ctx.fillText('LUIZ CLÁUDIO', W / 2, 924)
+  ctx.letterSpacing = '0em'
+
+  ctx.fillStyle    = '#C9A227'
+  ctx.font         = '500 21px "Oswald", sans-serif'
+  ctx.letterSpacing = '0.12em'
+  ctx.fillText('CANDIDATO A PRESIDENTE', W / 2, 952)
+  ctx.letterSpacing = '0em'
+
+  // separador entre candidatos
+  ctx.fillStyle = 'rgba(201,162,39,0.35)'
+  ctx.fillRect((W - 48) / 2, 968, 48, 1)
+
+  // Márcia Bezerra
+  ctx.fillStyle    = '#FFFFFF'
+  ctx.font         = 'bold 40px "Oswald", sans-serif'
+  ctx.letterSpacing = '0.04em'
+  ctx.fillText('MÁRCIA BEZERRA', W / 2, 1010)
+  ctx.letterSpacing = '0em'
+
+  ctx.fillStyle    = '#C9A227'
+  ctx.font         = '500 21px "Oswald", sans-serif'
+  ctx.letterSpacing = '0.12em'
+  ctx.fillText('CANDIDATA A VICE-PRESIDENTE', W / 2, 1038)
+  ctx.letterSpacing = '0em'
+
+  ctx.strokeStyle = 'rgba(201,162,39,0.25)'
+  ctx.lineWidth   = 1
+  ctx.beginPath(); ctx.moveTo(120, 1056); ctx.lineTo(W - 120, 1056); ctx.stroke()
+
   // ── CTA box ───────────────────────────────────────────────────
   ctx.fillStyle = '#C9A227'
-  ctx.fillRect(175, 1010, 550, 62)
+  ctx.fillRect(175, 1072, 550, 62)
   ctx.fillStyle    = '#0D1F3C'
   ctx.font         = 'bold 24px "Oswald", sans-serif'
   ctx.letterSpacing = '0.12em'
-  ctx.fillText('VENHA VOTAR TAMBÉM!', W / 2, 1050)
+  ctx.fillText('VENHA VOTAR TAMBÉM!', W / 2, 1112)
   ctx.letterSpacing = '0em'
 
   // ── URL ───────────────────────────────────────────────────────
   ctx.fillStyle = 'rgba(201,162,39,0.7)'
   ctx.font      = '18px Arial, sans-serif'
-  ctx.fillText('gestao-e-luta.vercel.app', W / 2, 1110)
+  ctx.fillText('gestao-e-luta.vercel.app', W / 2, 1158)
 
   // ── Rodapé: barra dourada ─────────────────────────────────────
   ctx.fillStyle = '#C9A227'
