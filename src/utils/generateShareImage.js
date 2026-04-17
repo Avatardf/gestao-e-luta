@@ -41,8 +41,8 @@ export async function generateShareImage() {
   ctx.fillStyle = '#C9A227'
   ctx.fillRect((W - 56) / 2, 248, 56, 56)
   ctx.fillStyle = '#0D1F3C'
-  ctx.font      = 'bold 24px "Oswald", sans-serif'
-  ctx.fillText('GL', W / 2, 285)
+  ctx.font      = 'bold 18px "Oswald", sans-serif'
+  ctx.fillText('CHAPA 3', W / 2, 283)
 
   // ── GESTÃO (branco) ───────────────────────────────────────────
   ctx.fillStyle    = '#FFFFFF'
@@ -79,7 +79,7 @@ export async function generateShareImage() {
   ctx.strokeRect(180, 800, 540, 58)
   ctx.fillStyle = '#FFFFFF'
   ctx.font      = '500 22px "Oswald", sans-serif'
-  ctx.fillText('SINDPOL-RJ — ELEIÇÕES 2025', W / 2, 837)
+  ctx.fillText('SINDPOL-RJ — ELEIÇÕES 2026', W / 2, 837)
 
   // ── Candidatos em destaque ────────────────────────────────────
   ctx.strokeStyle = 'rgba(201,162,39,0.25)'
@@ -96,7 +96,7 @@ export async function generateShareImage() {
   ctx.fillStyle    = '#C9A227'
   ctx.font         = '500 21px "Oswald", sans-serif'
   ctx.letterSpacing = '0.12em'
-  ctx.fillText('CANDIDATO A PRESIDENTE', W / 2, 952)
+  ctx.fillText('PRESIDENTE', W / 2, 952)
   ctx.letterSpacing = '0em'
 
   // separador entre candidatos
@@ -113,7 +113,7 @@ export async function generateShareImage() {
   ctx.fillStyle    = '#C9A227'
   ctx.font         = '500 21px "Oswald", sans-serif'
   ctx.letterSpacing = '0.12em'
-  ctx.fillText('CANDIDATA A VICE-PRESIDENTE', W / 2, 1038)
+  ctx.fillText('VICE-PRESIDENTE', W / 2, 1038)
   ctx.letterSpacing = '0em'
 
   ctx.strokeStyle = 'rgba(201,162,39,0.25)'
