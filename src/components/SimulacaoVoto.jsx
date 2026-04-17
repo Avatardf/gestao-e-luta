@@ -177,7 +177,7 @@ export default function SimulacaoVoto() {
                       )}
                     </div>
                     <div className="flex-1">
-                      <div className={`font-heading text-lg tracking-widest ${c.destaque ? 'text-gold-400' : 'text-slate-900 dark:text-white'}`}>{c.nome}</div>
+                      <div className={`font-heading text-lg tracking-widest ${c.destaque ? 'text-gold-600 dark:text-gold-400' : 'text-slate-900 dark:text-white'}`}>{c.nome}</div>
                       <div className="text-slate-500 dark:text-gray-400 text-xs mt-0.5">{c.descricao}</div>
                     </div>
                     {c.destaque && (
@@ -224,7 +224,7 @@ export default function SimulacaoVoto() {
                 {chapas.map((c) => (
                   <div key={c.id} className={`p-4 border ${c.id === selected || (alreadyVoted && c.id === 1) ? 'border-gold-500/40 bg-gold-500/5' : 'border-slate-200 bg-white dark:border-navy-700 dark:bg-navy-900'}`}>
                     <div className="flex items-center justify-between mb-2">
-                      <span className={`font-heading text-sm tracking-widest ${c.destaque ? 'text-gold-400' : 'text-slate-900 dark:text-white'}`}>{c.nome}</span>
+                      <span className={`font-heading text-sm tracking-widest ${c.destaque ? 'text-gold-600 dark:text-gold-400' : 'text-slate-900 dark:text-white'}`}>{c.nome}</span>
                       <span className="font-heading text-lg text-slate-900 dark:text-white">{pct(c.id)}%</span>
                     </div>
                     <div className="h-2 bg-slate-200 dark:bg-navy-800 overflow-hidden">
