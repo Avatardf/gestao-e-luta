@@ -4,13 +4,13 @@ import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Sobre from './components/Sobre'
 import Diretores from './components/Diretores'
-import Propostas from './components/Propostas'
 import SimulacaoVoto from './components/SimulacaoVoto'
 import Contato from './components/Contato'
 import Depoimentos from './components/Depoimentos'
 import Noticias from './components/Noticias'
 import Footer from './components/Footer'
 import Admin from './pages/Admin'
+import PropostasPage from './pages/Propostas'
 import { useVisitor } from './hooks/useVisitor'
 
 function Site() {
@@ -21,7 +21,6 @@ function Site() {
       <Hero />
       <Sobre />
       <Diretores />
-      <Propostas />
       <Noticias />
       <Depoimentos />
       <SimulacaoVoto />
@@ -50,7 +49,8 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/"      element={<Site />} />
-          <Route path="/admin" element={<Admin />} />
+          <Route path="/admin"     element={<Admin />} />
+          <Route path="/propostas" element={<PropostasPage />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

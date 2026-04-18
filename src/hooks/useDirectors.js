@@ -18,7 +18,19 @@ export function useDirectors() {
       .order('ordem', { ascending: true })
 
     if (data && data.length > 0) {
-      setDirectors(data)
+      // Mescla dados do Supabase com whatsapp/instagram do arquivo estático
+      // (caso a tabela não tenha essas colunas preenchidas)
+      const merged = data.map(d => {
+        const staticMatch = fallback.find(
+          f => f.nome.toLowerCase() === (d.nome || '').toLowerCase() || f.id === d.id
+        )
+        return {
+          ...d,
+          whatsapp: d.whatsapp || staticMatch?.whatsapp || null,
+          instagram: d.instagram || staticMatch?.instagram || null,
+        }
+      })
+      setDirectors(merged)
     } else {
       // fallback para dados estáticos enquanto tabela não existe
       setDirectors(fallback)

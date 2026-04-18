@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Preview PDF — Gestão & Luta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:#374151;
+    font-family:'Inter',sans-serif;
+    padding:20px;
+    display:flex;
+    justify-content:center;
+  }
+  /* A4 portrait @ 96dpi = 794×1123 */
+  .page {
+    width: 794px;
+    height: 1123px;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    color:#fff;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5);
+    display:flex;
+    flex-direction:column;
+  }
+  .page::before {
+    content:'';
+    position:absolute; inset:0;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(212,175,55,0.025) 0 2px, transparent 2px 80px);
+    pointer-events:none;
+  }
+  .page::after {
+    content:'';
+    position:absolute; top:-200px; right:-200px;
+    width:500px; height:500px;
+    background: radial-gradient(circle, rgba(212,175,55,0.1), transparent 70%);
+    pointer-events:none;
+  }
+
+  /* ── HEADER ───────────────────────────── */
+  .header {
+    padding: 18px 36px 14px;
+    border-bottom: 1px solid rgba(212,175,55,0.25);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:relative; z-index:2;
+  }
+  .logo-box { display:flex; align-items:center; gap:12px; }
+  .logo-square {
+    width:40px; height:40px;
+    background: linear-gradient(135deg,#f4d06f,#d4af37 55%,#a8821c);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Oswald'; font-weight:700; color:#0f172a; font-size:15px; letter-spacing:1px;
+  }
+  .logo-text { font-family:'Oswald'; font-weight:600; letter-spacing:4px; font-size:14px; }
+  .logo-text .amp { color:#d4af37; }
+  .header-right { text-align:right; font-family:'Oswald'; }
+  .header-right .chapa {
+    font-size:22px; font-weight:700; letter-spacing:3px;
+    background: linear-gradient(180deg,#f4d06f 0%,#d4af37 50%,#a8821c 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+  .header-right .data { font-size:10px; letter-spacing:3px; color:#94a3b8; margin-top:2px; }
+
+  /* ── TITLE ────────────────────────────── */
+  .title-block {
+    padding: 12px 40px 8px;
+    text-align:center;
+    position:relative; z-index:2;
+  }
+  .title-block h1 {
+    font-family:'Oswald'; font-weight:700;
+    font-size:26px; letter-spacing:4px;
+    background: linear-gradient(180deg,#f4d06f 0%,#d4af37 50%,#a8821c 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+  .title-block .subtitle {
+    font-family:'Oswald'; font-size:10px; letter-spacing:5px;
+    color:#cbd5e1; margin-top:3px;
+  }
+  .gold-line {
+    width:50px; height:2px;
+    background:linear-gradient(90deg,transparent,#d4af37,transparent);
+    margin: 6px auto 0;
+  }
+
+  /* ── SECTION LABEL ────────────────────── */
+  .section-label {
+    display:flex; align-items:center; gap:10px;
+    padding: 10px 36px 4px;
+    font-family:'Oswald'; font-size:10px; letter-spacing:4px;
+    color:#d4af37;
+    position:relative; z-index:2;
+  }
+  .section-label .bar {
+    flex:1; height:1px;
+    background:linear-gradient(90deg,#d4af37 0%, transparent 100%);
+  }
+
+  /* ── DIRETORES GRID ──────────────────── */
+  .diretores {
+    padding: 4px 28px 8px;
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    position:relative; z-index:2;
+  }
+  .diretor {
+    display:flex; flex-direction:column; align-items:center;
+    padding:10px 8px 12px;
+    background: rgba(255,255,255,0.04);
+    border:1px solid rgba(212,175,55,0.18);
+    border-radius:6px;
+    text-align:center;
+  }
+  .avatar {
+    width:72px; height:72px;
+    border-radius:50%;
+    padding:2px;
+    background: linear-gradient(135deg,#f4d06f,#d4af37,#a8821c);
+    flex-shrink:0;
+    margin-bottom:8px;
+    box-shadow: 0 4px 12px rgba(212,175,55,0.25);
+  }
+  .avatar-inner {
+    width:100%; height:100%;
+    border-radius:50%;
+    background:#1e293b;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+    font-family:'Oswald'; font-weight:700; color:#d4af37; font-size:22px;
+  }
+  .avatar-inner img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+  .diretor-nome {
+    font-family:'Oswald'; font-weight:600; font-size:12px;
+    letter-spacing:1.5px; color:#fff;
+    text-transform:uppercase;
+  }
+  .diretor-cargo {
+    font-size:9px; color:#d4af37; letter-spacing:1px;
+    margin-top:3px;
+    font-family:'Oswald';
+    text-transform:uppercase;
+  }
+
+  /* ── PROPOSTAS ───────────────────────── */
+  .propostas {
+    padding: 4px 28px 10px;
+    flex:1;
+    display:grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: 8px;
+    position:relative; z-index:2;
+  }
+  .tema-block {
+    background: rgba(255,255,255,0.03);
+    border:1px solid rgba(212,175,55,0.15);
+    border-left: 3px solid #d4af37;
+    padding: 8px 12px 10px;
+    border-radius: 3px;
+    display:flex; flex-direction:column;
+  }
+  .tema-header {
+    display:flex; align-items:center; gap:8px;
+    padding-bottom: 5px;
+    margin-bottom: 6px;
+    border-bottom:1px solid rgba(212,175,55,0.18);
+  }
+  .tema-icon { font-size:15px; }
+  .tema-title {
+    font-family:'Oswald'; font-weight:600; font-size:10px;
+    letter-spacing:2px; color:#d4af37; text-transform:uppercase;
+  }
+  .proposta {
+    padding: 3px 0;
+    display:flex; gap:8px;
+  }
+  .proposta-num {
+    font-family:'Oswald'; font-weight:700; font-size:10px;
+    color:#d4af37; min-width:20px;
+    padding-top:1px;
+  }
+  .proposta-body { flex:1; }
+  .proposta-titulo {
+    font-size:10px; color:#f1f5f9; line-height:1.3;
+    font-weight:600;
+    font-family:'Oswald';
+    letter-spacing:0.5px;
+  }
+  .proposta-desc {
+    font-size:8.5px; color:#94a3b8; line-height:1.35;
+    margin-top:2px;
+  }
+
+  /* ── FOOTER ──────────────────────────── */
+  .footer {
+    padding: 10px 36px 14px;
+    border-top:1px solid rgba(212,175,55,0.25);
+    display:flex; justify-content:space-between; align-items:center;
+    position:relative; z-index:2;
+  }
+  .footer-left { font-family:'Oswald'; font-size:10px; letter-spacing:3px; color:#94a3b8; }
+  .footer-left strong { color:#d4af37; }
+  .footer-right {
+    font-family:'Oswald'; font-size:10px; letter-spacing:3px; color:#94a3b8;
+    text-align:right;
+  }
+  .vote {
+    display:inline-block;
+    padding: 5px 14px;
+    background: linear-gradient(135deg,#f4d06f,#d4af37 55%,#a8821c);
+    color:#0f172a;
+    font-family:'Oswald'; font-weight:700; font-size:11px;
+    letter-spacing:3px; margin-left:10px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo-box">
+      <div class="logo-square">GL</div>
+      <div class="logo-text">GESTÃO <span class="amp">&</span> LUTA</div>
+    </div>
+    <div class="header-right">
+      <div class="chapa">CHAPA 3</div>
+      <div class="data">ELEIÇÕES SINDPOL-RJ • 09.05.2026</div>
+    </div>
+  </div>
+
+  <!-- TITLE -->
+  <div class="title-block">
+    <h1>UMA NOVA ERA PARA O SINDPOL-RJ</h1>
+    <div class="subtitle">9 DIRETORES • 12 PROPOSTAS • 1 COMPROMISSO</div>
+    <div class="gold-line"></div>
+  </div>
+
+  <!-- DIRETORES -->
+  <div class="section-label">
+    <span>NOSSOS DIRETORES</span>
+    <span class="bar"></span>
+  </div>
+  <div class="diretores" id="diretores-grid"></div>
+
+  <!-- PROPOSTAS -->
+  <div class="section-label">
+    <span>NOSSAS 12 PROPOSTAS</span>
+    <span class="bar"></span>
+  </div>
+  <div class="propostas">
+
+    <div class="tema-block">
+      <div class="tema-header"><span class="tema-icon">💰</span><span class="tema-title">Valorização Salarial</span></div>
+      <div class="proposta"><span class="proposta-num">01</span><div class="proposta-body"><div class="proposta-titulo">Resgate da ACP das Promoções</div><div class="proposta-desc">Execução imediata da vitória judicial para regularizar as promoções atrasadas.</div></div></div>
+      <div class="proposta"><span class="proposta-num">02</span><div class="proposta-body"><div class="proposta-titulo">Recomposição Salarial Já!</div><div class="proposta-desc">Pagamento integral das parcelas devidas da Lei 9.436/2021.</div></div></div>
+      <div class="proposta"><span class="proposta-num">03</span><div class="proposta-body"><div class="proposta-titulo">Adequação Salarial das Carreiras</div><div class="proposta-desc">Comissário ao índice 1250, GHP no Triênio e GATCNS ao Oficial.</div></div></div>
+      <div class="proposta"><span class="proposta-num">04</span><div class="proposta-body"><div class="proposta-titulo">Regulamentação dos Direitos</div><div class="proposta-desc">Adicional Noturno, Insalubridade, Auxílios e Horas Extras efetivados.</div></div></div>
+    </div>
+
+    <div class="tema-block">
+      <div class="tema-header"><span class="tema-icon">⚖️</span><span class="tema-title">Proteção Jurídica</span></div>
+      <div class="proposta"><span class="proposta-num">05</span><div class="proposta-body"><div class="proposta-titulo">Efetivo Mínimo nos Plantões</div><div class="proposta-desc">Cumprimento da lei, fim da sobrecarga que adoece o policial civil.</div></div></div>
+      <div class="proposta"><span class="proposta-num">06</span><div class="proposta-body"><div class="proposta-titulo">Moralização das Promoções por Bravura</div><div class="proposta-desc">Critérios claros, sem favorecimento, com reconhecimento real do mérito.</div></div></div>
+      <div class="proposta"><span class="proposta-num">07</span><div class="proposta-body"><div class="proposta-titulo">Equipamentos e Segurança</div><div class="proposta-desc">Meios adequados e proteção da integridade física de cada policial.</div></div></div>
+    </div>
+
+    <div class="tema-block">
+      <div class="tema-header"><span class="tema-icon">🛡️</span><span class="tema-title">Previdência e Legislação</span></div>
+      <div class="proposta"><span class="proposta-num">08</span><div class="proposta-body"><div class="proposta-titulo">Plano de Saúde de Autogestão</div><div class="proposta-desc">Modelo similar ao PF Saúde, gestão autônoma e custo justo.</div></div></div>
+      <div class="proposta"><span class="proposta-num">09</span><div class="proposta-body"><div class="proposta-titulo">Regulamentação Pós-2013</div><div class="proposta-desc">Paridade previdenciária para todos, independente da data de ingresso.</div></div></div>
+    </div>
+
+    <div class="tema-block">
+      <div class="tema-header"><span class="tema-icon">🏛️</span><span class="tema-title">Estrutura e Representatividade</span></div>
+      <div class="proposta"><span class="proposta-num">10</span><div class="proposta-body"><div class="proposta-titulo">Reformas de Delegacias</div><div class="proposta-desc">Parcerias público-privadas para modernização e dignidade no atendimento.</div></div></div>
+      <div class="proposta"><span class="proposta-num">11</span><div class="proposta-body"><div class="proposta-titulo">Delegacias Sindicais no Interior</div><div class="proposta-desc">Representatividade real — fim da desigualdade entre capital e interior.</div></div></div>
+      <div class="proposta"><span class="proposta-num">12</span><div class="proposta-body"><div class="proposta-titulo">Cursos e Palestras</div><div class="proposta-desc">Capacitação profissional para ativos e aposentados, com parcerias sérias.</div></div></div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-left">EU APOIO <strong>GESTÃO &amp; LUTA</strong></div>
+    <div class="footer-right">09.05.2026 <span class="vote">VOTE CHAPA 3</span></div>
+  </div>
+
+</div>
+
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+  const supabase = createClient(
+    'https://lhstwgmqmeuwkcjkzqbw.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxoc3R3Z21xbWV1d2tjamt6cWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyOTQ2MjEsImV4cCI6MjA5MTg3MDYyMX0.PNu3wBD8R-Q70rKAZUNCgdTg4wLO2fBsF_oHAr5WRR0'
+  )
+
+  // fallback cargos simplificados
+  const cargoMap = {
+    1: 'PRESIDENTE', 2: 'VICE-PRESIDENTE', 3: 'SECRETÁRIO', 4: 'TESOUREIRA',
+    5: 'DIR. JURÍDICO', 6: 'REL. INSTITUCIONAIS', 7: 'DIR. DE INATIVOS',
+    8: 'DIR. DO INTERIOR', 9: 'CARGOS E ATRIBUIÇÕES'
+  }
+
+  const { data } = await supabase.from('directors').select('*').order('id')
+  const grid = document.getElementById('diretores-grid')
+
+  data.forEach(d => {
+    const initials = d.nome.split(' ').slice(0,2).map(n=>n[0]).join('')
+    const cargo = cargoMap[d.id] || d.cargo.replace(/^candidat[ao] a /i,'').toUpperCase()
+    const el = document.createElement('div')
+    el.className = 'diretor'
+    el.innerHTML = `
+      <div class="avatar"><div class="avatar-inner">
+        ${d.foto ? `<img src="${d.foto}" alt="${d.nome}">` : initials}
+      </div></div>
+      <div class="diretor-nome">${d.nome}</div>
+      <div class="diretor-cargo">${cargo}</div>
+    `
+    grid.appendChild(el)
+  })
+</script>
+</body>
+</html>

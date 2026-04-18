@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
-import { Shield, RefreshCw, Trash2, LogOut, Loader2, Users, Vote, MapPin, Clock, Edit2, Save, X, ChevronDown, ChevronUp, Camera, Plus, Newspaper, MessageSquare } from 'lucide-react'
+import { Shield, RefreshCw, Trash2, LogOut, Loader2, Users, Vote, MapPin, Clock, Edit2, Save, X, ChevronDown, ChevronUp, Camera, Plus, Newspaper, MessageSquare, Crop } from 'lucide-react'
 
 const META       = 600
 const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASSWORD || 'gestao2025'
@@ -10,11 +10,236 @@ function fmt(dateStr) {
   return d.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
 }
 
+// ── Modal de recorte 1:1 ────────────────────────────────────────
+function CropModal({ file, onConfirm, onCancel }) {
+  const [imgSrc, setImgSrc] = useState(null)
+  const [ready, setReady]   = useState(false)
+  const [crop, setCrop]     = useState({ x: 0, y: 0, size: 200 })
+
+  const imgRef  = useRef(null)
+  const natRef  = useRef({ w: 0, h: 0 })
+  const dispRef = useRef({ w: 0, h: 0 })
+  const cropRef = useRef({ x: 0, y: 0, size: 200 })
+  const dragRef = useRef(null)
+
+  // Create object URL for selected file
+  useEffect(() => {
+    const url = URL.createObjectURL(file)
+    setImgSrc(url)
+    return () => URL.revokeObjectURL(url)
+  }, [file])
+
+  // Attach / detach global drag listeners
+  useEffect(() => {
+    function onMove(e) {
+      if (!dragRef.current) return
+      if (e.cancelable) e.preventDefault()
+      const cx = e.touches ? e.touches[0].clientX : e.clientX
+      const cy = e.touches ? e.touches[0].clientY : e.clientY
+      const dx = cx - dragRef.current.sx
+      const dy = cy - dragRef.current.sy
+      const { mode, ox, oy, os } = dragRef.current
+      const { w: dW, h: dH }    = dispRef.current
+      let nx = ox, ny = oy, ns = os
+
+      if (mode === 'move') {
+        nx = ox + dx
+        ny = oy + dy
+      } else {
+        // diagonal delta per corner
+        let d
+        if      (mode === 'se') d =  (dx + dy) / 2
+        else if (mode === 'nw') d = -(dx + dy) / 2
+        else if (mode === 'ne') d =  (dx - dy) / 2
+        else                    d = -(dx - dy) / 2   // sw
+        ns = Math.max(40, os + d)
+        ns = Math.min(ns, dW, dH)
+        if      (mode === 'nw') { nx = ox + os - ns; ny = oy + os - ns }
+        else if (mode === 'ne') { nx = ox;            ny = oy + os - ns }
+        else if (mode === 'sw') { nx = ox + os - ns;  ny = oy }
+        // se: nx/ny stay as ox/oy
+      }
+
+      nx = Math.max(0, Math.min(nx, dW - ns))
+      ny = Math.max(0, Math.min(ny, dH - ns))
+
+      const next = { x: nx, y: ny, size: ns }
+      cropRef.current = next
+      setCrop(next)
+    }
+
+    function onUp() { dragRef.current = null }
+
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup',   onUp)
+    window.addEventListener('touchmove', onMove, { passive: false })
+    window.addEventListener('touchend',  onUp)
+    return () => {
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup',   onUp)
+      window.removeEventListener('touchmove', onMove)
+      window.removeEventListener('touchend',  onUp)
+    }
+  }, [])
+
+  function onImgLoad(e) {
+    const img = e.currentTarget
+    natRef.current  = { w: img.naturalWidth, h: img.naturalHeight }
+    dispRef.current = { w: img.offsetWidth,  h: img.offsetHeight  }
+    const { w, h }  = dispRef.current
+    const size = Math.round(Math.min(w, h) * 0.8)
+    const init = { x: Math.round((w - size) / 2), y: Math.round((h - size) / 2), size }
+    cropRef.current = init
+    setCrop(init)
+    setReady(true)
+  }
+
+  function startDrag(e, mode) {
+    e.preventDefault()
+    e.stopPropagation()
+    const cx = e.touches ? e.touches[0].clientX : e.clientX
+    const cy = e.touches ? e.touches[0].clientY : e.clientY
+    dragRef.current = { mode, sx: cx, sy: cy, ox: cropRef.current.x, oy: cropRef.current.y, os: cropRef.current.size }
+  }
+
+  async function handleConfirm() {
+    if (!ready || !imgRef.current) return
+    const OUT = 800
+    const canvas = document.createElement('canvas')
+    canvas.width  = OUT
+    canvas.height = OUT
+    const ctx = canvas.getContext('2d')
+    const { w: dW, h: dH } = dispRef.current
+    const { w: nW, h: nH } = natRef.current
+    const sx = (crop.x    / dW) * nW
+    const sy = (crop.y    / dH) * nH
+    const sw = (crop.size / dW) * nW
+    const sh = (crop.size / dH) * nH
+    ctx.drawImage(imgRef.current, sx, sy, sw, sh, 0, 0, OUT, OUT)
+    canvas.toBlob(blob => onConfirm(blob), 'image/jpeg', 0.92)
+  }
+
+  const corners = [
+    { mode: 'nw', style: { top: 0,    left: 0,    transform: 'translate(-50%,-50%)', cursor: 'nw-resize' } },
+    { mode: 'ne', style: { top: 0,    right: 0,   transform: 'translate(50%,-50%)',  cursor: 'ne-resize' } },
+    { mode: 'sw', style: { bottom: 0, left: 0,    transform: 'translate(-50%,50%)',  cursor: 'sw-resize' } },
+    { mode: 'se', style: { bottom: 0, right: 0,   transform: 'translate(50%,50%)',   cursor: 'se-resize' } },
+  ]
+
+  return (
+    <div
+      className="fixed inset-0 z-[200] bg-black/85 flex items-center justify-center p-4"
+      onClick={onCancel}
+    >
+      <div
+        className="bg-navy-900 border border-navy-700 w-full max-w-lg shadow-2xl"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-navy-700">
+          <div>
+            <p className="font-heading text-white tracking-widest text-sm flex items-center gap-2">
+              <Crop size={14} className="text-gold-500" /> RECORTAR FOTO — 1:1
+            </p>
+            <p className="text-gray-500 text-xs mt-0.5">Arraste o quadro para mover · Arraste os cantos para redimensionar</p>
+          </div>
+          <button onClick={onCancel} className="text-gray-500 hover:text-white transition-colors ml-4">
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Image + overlay */}
+        <div className="px-4 pt-4">
+          <div className="relative bg-black select-none" style={{ lineHeight: 0 }}>
+            {imgSrc && (
+              <img
+                ref={imgRef}
+                src={imgSrc}
+                alt="recorte"
+                className="block w-full h-auto"
+                style={{ maxHeight: '55vh', objectFit: 'contain' }}
+                onLoad={onImgLoad}
+                draggable={false}
+              />
+            )}
+
+            {ready && (
+              <>
+                {/* Darkened overlay — 4 panels around crop box */}
+                <div className="absolute inset-0 pointer-events-none">
+                  <div className="absolute bg-black/60" style={{ top: 0, left: 0, right: 0, height: crop.y }} />
+                  <div className="absolute bg-black/60" style={{ top: crop.y + crop.size, left: 0, right: 0, bottom: 0 }} />
+                  <div className="absolute bg-black/60" style={{ top: crop.y, left: 0, width: crop.x, height: crop.size }} />
+                  <div className="absolute bg-black/60" style={{ top: crop.y, left: crop.x + crop.size, right: 0, height: crop.size }} />
+                </div>
+
+                {/* Crop box */}
+                <div
+                  className="absolute border-2 border-gold-400 cursor-move"
+                  style={{ top: crop.y, left: crop.x, width: crop.size, height: crop.size }}
+                  onMouseDown={e => startDrag(e, 'move')}
+                  onTouchStart={e => startDrag(e, 'move')}
+                >
+                  {/* Rule-of-thirds grid */}
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      backgroundImage: [
+                        'linear-gradient(rgba(255,215,0,.25) 1px, transparent 1px)',
+                        'linear-gradient(90deg, rgba(255,215,0,.25) 1px, transparent 1px)',
+                      ].join(','),
+                      backgroundSize: `${Math.round(crop.size / 3)}px ${Math.round(crop.size / 3)}px`,
+                    }}
+                  />
+
+                  {/* Corner handles */}
+                  {corners.map(({ mode, style }) => (
+                    <div
+                      key={mode}
+                      className="absolute w-4 h-4 bg-gold-500 rounded-[2px] z-10"
+                      style={style}
+                      onMouseDown={e => startDrag(e, mode)}
+                      onTouchStart={e => startDrag(e, mode)}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-5 py-4 mt-4 border-t border-navy-700 flex items-center justify-between">
+          <p className="text-gray-600 text-xs font-heading">
+            {Math.round(crop.size)} × {Math.round(crop.size)} px
+          </p>
+          <div className="flex gap-3">
+            <button
+              onClick={onCancel}
+              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors font-heading text-xs uppercase tracking-widest px-4 py-2"
+            >
+              <X size={13} /> Cancelar
+            </button>
+            <button
+              onClick={handleConfirm}
+              disabled={!ready}
+              className="flex items-center gap-2 bg-gold-500 text-navy-950 font-heading text-xs uppercase tracking-widest px-5 py-2 hover:bg-gold-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Camera size={13} /> Aplicar recorte
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Editor de um diretor ────────────────────────────────────────
 function DirectorEditor({ director, onSaved }) {
   const [open, setOpen]         = useState(false)
   const [saving, setSaving]     = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [cropFile, setCropFile] = useState(null)
   const fileInputRef            = useRef(null)
   const [form, setForm]         = useState({
     nome:      director.nome      || '',
@@ -29,15 +254,23 @@ function DirectorEditor({ director, onSaved }) {
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
-  async function handlePhotoUpload(e) {
+  // Step 1: file selected → open crop modal (do NOT upload yet)
+  function handlePhotoUpload(e) {
     const file = e.target.files[0]
     if (!file) return
+    setCropFile(file)
+    // reset input so the same file can be re-selected after cancelling
+    e.target.value = ''
+  }
+
+  // Step 2: crop confirmed → upload the cropped JPEG blob to Supabase
+  async function uploadCroppedBlob(blob) {
+    setCropFile(null)
     setUploading(true)
-    const ext  = file.name.split('.').pop()
-    const path = `director-${director.id}-${Date.now()}.${ext}`
+    const path = `director-${director.id}-${Date.now()}.jpg`
     const { error: upErr } = await supabase.storage
       .from('director-photos')
-      .upload(path, file, { upsert: true })
+      .upload(path, blob, { upsert: true, contentType: 'image/jpeg' })
     if (upErr) { alert('Erro no upload: ' + upErr.message); setUploading(false); return }
     const { data: { publicUrl } } = supabase.storage
       .from('director-photos')
@@ -48,12 +281,27 @@ function DirectorEditor({ director, onSaved }) {
 
   async function handleSave() {
     setSaving(true)
+    // Envia somente os campos que sabemos que existem na tabela
+    const payload = {
+      nome:      form.nome,
+      cargo:     form.cargo,
+      delegacia: form.delegacia,
+      resumo:    form.resumo,
+      bio:       form.bio,
+      whatsapp:  form.whatsapp,
+      instagram: form.instagram,
+      foto:      form.foto,
+    }
     const { error } = await supabase
       .from('directors')
-      .update(form)
+      .update(payload)
       .eq('id', director.id)
     setSaving(false)
-    if (error) { alert('Erro ao salvar: ' + error.message); return }
+    if (error) {
+      console.error('Erro ao salvar diretor:', error)
+      alert(`Erro ao salvar: ${error.message}\n\nCódigo: ${error.code || '—'}`)
+      return
+    }
     setOpen(false)
     onSaved()
   }
@@ -77,6 +325,15 @@ function DirectorEditor({ director, onSaved }) {
         <Edit2 size={14} className="text-gray-500" />
         {open ? <ChevronUp size={16} className="text-gray-500" /> : <ChevronDown size={16} className="text-gray-500" />}
       </button>
+
+      {/* Crop modal — rendered outside the collapsible form so it always appears */}
+      {cropFile && (
+        <CropModal
+          file={cropFile}
+          onConfirm={uploadCroppedBlob}
+          onCancel={() => setCropFile(null)}
+        />
+      )}
 
       {/* Edit form */}
       {open && (

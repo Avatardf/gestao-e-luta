@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { CheckCircle2, Vote, Share2, AlertCircle, Loader2 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useVisitor } from '../hooks/useVisitor'
+import { useInView } from '../hooks/useInView'
 import { generateShareImage } from '../utils/generateShareImage'
 
 const META = 600
@@ -9,26 +10,37 @@ const META = 600
 const chapas = [
   { id: 2, nome: 'Chapa 1', descricao: 'Outra proposta de gestão', destaque: false },
   { id: 3, nome: 'Chapa 2', descricao: 'Outra proposta de gestão', destaque: false },
-  { id: 1, nome: 'GESTÃO E LUTA — Chapa 3', descricao: 'Transparência · Compromisso · Resultado', destaque: true },
+  { id: 1, nome: 'GESTÃO E LUTA — Chapa 3', descricao: 'GESTÃO PARA ORGANIZAR | LUTA PARA VENCER', destaque: true },
+  { id: 4, nome: 'Chapa 4', descricao: 'Outra proposta de gestão', destaque: false },
 ]
 
 function Termometro({ total }) {
   const pct = Math.min(Math.round((total / META) * 100), 100)
-  const cor = pct >= 100 ? 'bg-green-500' : pct >= 60 ? 'bg-gold-500' : 'bg-blue-500'
+  const cor = pct >= 100
+    ? 'bg-gradient-to-r from-green-500 to-green-400'
+    : pct >= 60
+    ? 'bg-gradient-to-r from-gold-600 to-gold-400'
+    : 'bg-gradient-to-r from-blue-600 to-blue-400'
   return (
-    <div className="mb-8 p-5 bg-slate-50 border border-slate-200 dark:bg-navy-900 dark:border-navy-700">
-      <div className="flex justify-between items-end mb-2">
+    <div className="mb-8 p-5 bg-slate-50 border border-slate-200 dark:bg-navy-900 dark:border-navy-700
+                    hover:border-gold-500/30 transition-colors duration-300">
+      <div className="flex justify-between items-end mb-3">
         <span className="font-heading text-xs text-slate-500 dark:text-gray-400 tracking-widest uppercase">Termômetro da vitória</span>
-        <span className="font-heading text-2xl text-gold-400">{total}<span className="text-slate-400 dark:text-gray-500 text-sm">/{META}</span></span>
+        <span className="font-heading text-2xl text-gold-400 tabular-nums">
+          {total}<span className="text-slate-400 dark:text-gray-500 text-sm">/{META}</span>
+        </span>
       </div>
-      <div className="h-3 bg-slate-200 dark:bg-navy-800 overflow-hidden">
-        <div className={`h-full transition-all duration-700 ${cor}`} style={{ width: `${pct}%` }} />
+      <div className="h-3 bg-slate-200 dark:bg-navy-800 overflow-hidden rounded-sm">
+        <div className={`h-full transition-all duration-1000 ${cor} shadow-sm`} style={{ width: `${pct}%` }} />
       </div>
-      <p className="text-slate-500 dark:text-gray-500 text-xs mt-2">
-        {pct >= 100
-          ? '✅ Meta atingida! Seguimos em frente!'
-          : `Faltam ${META - total} votos para atingir a meta de ${META}`}
-      </p>
+      <div className="flex items-center justify-between mt-2">
+        <p className="text-slate-500 dark:text-gray-500 text-xs">
+          {pct >= 100
+            ? '✅ Meta atingida! Seguimos em frente!'
+            : `Faltam ${META - total} votos para atingir a meta de ${META}`}
+        </p>
+        <span className="font-heading text-xs text-gold-500">{pct}%</span>
+      </div>
     </div>
   )
 }
@@ -40,7 +52,7 @@ export default function SimulacaoVoto() {
   const [alreadyVoted, setAlready] = useState(false)
   const [loading, setLoading]      = useState(true)
   const [submitting, setSubmit]    = useState(false)
-  const [counts, setCounts]        = useState({ 1: 0, 2: 0, 3: 0 })
+  const [counts, setCounts]        = useState({ 1: 0, 2: 0, 3: 0, 4: 0 })
   const [total, setTotal]          = useState(0)
 
   useEffect(() => {
@@ -55,7 +67,7 @@ export default function SimulacaoVoto() {
     setLoading(true)
     const { data } = await supabase.from('votes').select('chapa_id')
     if (data) {
-      const c = { 1: 0, 2: 0, 3: 0 }
+      const c = { 1: 0, 2: 0, 3: 0, 4: 0 }
       data.forEach(v => { c[v.chapa_id] = (c[v.chapa_id] || 0) + 1 })
       setCounts(c)
       setTotal(c[1])
@@ -129,14 +141,23 @@ export default function SimulacaoVoto() {
     setSharing(false)
   }
 
+  const [headerRef, headerInView] = useInView()
+  const [cardRef, cardInView]     = useInView()
+
   return (
-    <section id="votacao" className="py-24 bg-white dark:bg-navy-950 relative overflow-hidden">
-      <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none select-none">
-        <span className="font-heading text-[20rem] text-gold-500 leading-none">X</span>
+    <section id="votacao" className="py-28 bg-white dark:bg-navy-950 relative overflow-hidden">
+      <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none select-none">
+        <span className="font-heading text-[28rem] text-gold-500 leading-none">X</span>
+      </div>
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="w-[500px] h-[500px] rounded-full bg-gold-500/4 blur-3xl" />
       </div>
 
       <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <div
+          ref={headerRef}
+          className={`text-center mb-16 transition-all duration-700 ${headerInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+        >
           <p className="font-heading text-gold-500 text-sm tracking-widest uppercase mb-2">Participe</p>
           <h2 className="section-title">Simule seu Voto</h2>
           <span className="gold-line mx-auto" />
@@ -154,26 +175,30 @@ export default function SimulacaoVoto() {
             <Termometro total={total} />
 
             {!voted ? (
-              <div className="space-y-4 mb-8">
-                {chapas.map((c) => (
+              <div ref={cardRef} className={`space-y-4 mb-8 transition-all duration-700 ${cardInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+                {chapas.map((c, i) => (
                   <button
                     key={c.id}
                     onClick={() => setSelected(c.id)}
-                    className={`w-full text-left p-5 border-2 transition-all duration-200 flex items-center gap-4 ${
-                      selected === c.id
+                    style={{ transitionDelay: `${i * 80}ms` }}
+                    className={`w-full text-left p-5 border-2 transition-all duration-300 flex items-center gap-4
+                      hover:-translate-y-0.5 hover:shadow-lg
+                      ${selected === c.id
                         ? c.destaque
-                          ? 'border-gold-500 bg-gold-500/10'
+                          ? 'border-gold-500 bg-gold-500/10 shadow-lg shadow-gold-500/10'
                           : 'border-slate-400 bg-slate-100 dark:border-navy-500 dark:bg-navy-800'
-                        : 'border-slate-200 bg-white hover:border-slate-400 dark:border-navy-700 dark:bg-navy-900 dark:hover:border-navy-500'
-                    }`}
+                        : c.destaque
+                          ? 'border-slate-200 bg-white hover:border-gold-500/40 dark:border-navy-700 dark:bg-navy-900 hover:shadow-gold-500/5'
+                          : 'border-slate-200 bg-white hover:border-slate-400 dark:border-navy-700 dark:bg-navy-900 dark:hover:border-navy-500'
+                      }`}
                   >
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all duration-200 ${
                       selected === c.id
                         ? c.destaque ? 'border-gold-500' : 'border-slate-500 dark:border-gray-400'
                         : 'border-slate-300 dark:border-navy-600'
                     }`}>
                       {selected === c.id && (
-                        <div className={`w-2.5 h-2.5 rounded-full ${c.destaque ? 'bg-gold-500' : 'bg-slate-500 dark:bg-gray-400'}`} />
+                        <div className={`w-2.5 h-2.5 rounded-full animate-scale-in ${c.destaque ? 'bg-gold-500' : 'bg-slate-500 dark:bg-gray-400'}`} />
                       )}
                     </div>
                     <div className="flex-1">
@@ -181,7 +206,7 @@ export default function SimulacaoVoto() {
                       <div className="text-slate-500 dark:text-gray-400 text-xs mt-0.5">{c.descricao}</div>
                     </div>
                     {c.destaque && (
-                      <span className="bg-gold-500 text-navy-950 font-heading text-xs px-2 py-0.5 tracking-wider">NOSSA CHAPA</span>
+                      <span className="bg-gold-500 text-navy-950 font-heading text-xs px-2 py-0.5 tracking-wider shrink-0">NOSSA CHAPA</span>
                     )}
                   </button>
                 ))}
@@ -189,9 +214,9 @@ export default function SimulacaoVoto() {
                 <button
                   onClick={handleVote}
                   disabled={!selected || submitting || !visitor}
-                  className={`w-full mt-4 flex items-center justify-center gap-3 py-4 font-heading text-sm uppercase tracking-widest transition-all duration-200 ${
+                  className={`w-full mt-4 flex items-center justify-center gap-3 py-4 font-heading text-sm uppercase tracking-widest transition-all duration-300 ${
                     selected && visitor
-                      ? 'bg-gold-500 text-navy-950 hover:bg-gold-400 cursor-pointer'
+                      ? 'bg-gold-500 text-navy-950 hover:bg-gold-400 cursor-pointer hover:shadow-lg hover:shadow-gold-500/30 hover:-translate-y-0.5'
                       : 'bg-slate-200 text-slate-400 cursor-not-allowed dark:bg-navy-800 dark:text-navy-600'
                   }`}
                 >
@@ -227,9 +252,9 @@ export default function SimulacaoVoto() {
                       <span className={`font-heading text-sm tracking-widest ${c.destaque ? 'text-gold-600 dark:text-gold-400' : 'text-slate-900 dark:text-white'}`}>{c.nome}</span>
                       <span className="font-heading text-lg text-slate-900 dark:text-white">{pct(c.id)}%</span>
                     </div>
-                    <div className="h-2 bg-slate-200 dark:bg-navy-800 overflow-hidden">
+                    <div className="h-2 bg-slate-200 dark:bg-navy-800 overflow-hidden rounded-sm">
                       <div
-                        className={`h-full transition-all duration-700 ${c.destaque ? 'bg-gold-500' : 'bg-slate-400 dark:bg-navy-500'}`}
+                        className={`h-full transition-all duration-1000 ${c.destaque ? 'bg-gradient-to-r from-gold-600 to-gold-400' : 'bg-slate-400 dark:bg-navy-500'}`}
                         style={{ width: `${pct(c.id)}%` }}
                       />
                     </div>
