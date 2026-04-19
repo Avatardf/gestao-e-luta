@@ -253,7 +253,7 @@ export default function KitPage() {
               emoji="🤝"
               loading={!!generating['apoio']}
               onDownload={() => handleDownload('apoio', generateShareImage)}
-              onShare={() => handleShare('apoio', generateShareImage, 'Eu apoio a Chapa 3 — GESTÃO E LUTA! Vote em 09 de maio. bit.ly/chapa3_sindpol')}
+              onShare={() => handleShare('apoio', generateShareImage, 'Eu apoio a Chapa 3 — GESTÃO E LUTA! Vote em 09 de maio.')}
             />
             <KitCard
               title="Contagem Regressiva"
@@ -270,7 +270,7 @@ export default function KitPage() {
                 const pres = diretores.find(d => d.id === 1)
                 const vp   = diretores.find(d => d.id === 2)
                 return generateContagemCard({ presidenteFotoUrl: fotoSrc(pres ?? {}), vpFotoUrl: fotoSrc(vp ?? {}) })
-              }, `Faltam poucos dias para a eleição do SINDPOL-RJ! Vote na Chapa 3 — GESTÃO E LUTA em 09 de maio. bit.ly/chapa3_sindpol`)}
+              }, `Faltam poucos dias para a eleição do SINDPOL-RJ! Vote na Chapa 3 — GESTÃO E LUTA em 09 de maio.`)}
             />
           </div>
         </section>
@@ -295,7 +295,7 @@ export default function KitPage() {
                 onShare={() => handleShare(
                   `proposta-${p.id}`,
                   () => generatePropostaShareImage(p),
-                  `Apoio essa proposta da Chapa GESTÃO E LUTA: "${p.titulo}". Conheça todas as propostas! bit.ly/chapa3_sindpol`
+                  `Apoio essa proposta da Chapa GESTÃO E LUTA: "${p.titulo}". Conheça todas as propostas!`
                 )}
               />
             ))}
@@ -339,7 +339,7 @@ export default function KitPage() {
                     onShare={() => handleShare(
                       `diretor-${dir.id}`,
                       () => generateDiretorCard(diretorObj),
-                      `Conheça ${dir.nome}, ${cargoLabel} da Chapa 3 — GESTÃO E LUTA! Vote em 09 de maio. bit.ly/chapa3_sindpol`
+                      `Conheça ${dir.nome}, ${cargoLabel} da Chapa 3 — GESTÃO E LUTA! Vote em 09 de maio.`
                     )}
                   />
                 )
@@ -363,7 +363,7 @@ export default function KitPage() {
               emoji="🗳️"
               loading={!!generating['vote']}
               onDownload={() => handleDownload('vote', generateVoteCard)}
-              onShare={() => handleShare('vote', generateVoteCard, 'Vote na Chapa 3 — GESTÃO E LUTA! Eleição SINDPOL-RJ: 09 de maio de 2026 · 9H30. bit.ly/chapa3_sindpol')}
+              onShare={() => handleShare('vote', generateVoteCard, 'Vote na Chapa 3 — GESTÃO E LUTA! Eleição SINDPOL-RJ: 09 de maio de 2026 · 9H30.')}
             />
             <KitCard
               title="Contagem Regressiva"
@@ -380,7 +380,7 @@ export default function KitPage() {
                 const pres = diretores.find(d => d.id === 1)
                 const vp   = diretores.find(d => d.id === 2)
                 return generateContagemCard({ presidenteFotoUrl: fotoSrc(pres ?? {}), vpFotoUrl: fotoSrc(vp ?? {}) })
-              }, `Faltam poucos dias para a eleição do SINDPOL-RJ! Vote na Chapa 3 — GESTÃO E LUTA em 09 de maio. bit.ly/chapa3_sindpol`)}
+              }, `Faltam poucos dias para a eleição do SINDPOL-RJ! Vote na Chapa 3 — GESTÃO E LUTA em 09 de maio.`)}
             />
           </div>
         </section>
