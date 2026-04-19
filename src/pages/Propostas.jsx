@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { CheckCircle2, Star, ArrowLeft, Trophy, Users, Loader2, Download } from 'lucide-react'
+import { CheckCircle2, Star, ArrowLeft, Trophy, Users, Loader2, Download, Share2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { propostas, temas } from '../data/propostas'
 import { useTheme } from '../context/ThemeContext'
@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase'
 import { useVisitor } from '../hooks/useVisitor'
 import { Sun, Moon } from 'lucide-react'
 import { generateChapaPDF } from '../utils/generatePDF'
+import { generatePropostaShareImage } from '../utils/generatePropostaImage'
 
 // ─── Persistência local (fallback) ───────────────────────────────────────────
 function loadLocalRatings() {
@@ -108,11 +109,46 @@ function StarRating({ propostaId, value, submitting, onChange }) {
   )
 }
 
+// ─── Escala de fontes por nível ───────────────────────────────────────────────
+const FONTE = [
+  { icone: 24, titulo: 16, descricao: 14, pontos: 14, check: 13 }, // nível 0 — normal
+  { icone: 28, titulo: 19, descricao: 17, pontos: 16, check: 15 }, // nível 1 — médio
+  { icone: 32, titulo: 22, descricao: 20, pontos: 19, check: 17 }, // nível 2 — grande
+]
+
 // ─── Card de proposta ─────────────────────────────────────────────────────────
-function PropostaCard({ proposta, userRating, communityData, submitting, onRate, fonteLarge }) {
+function PropostaCard({ proposta, userRating, communityData, submitting, onRate, fonteLevel }) {
   const { media, total, loading } = communityData
-  const txt  = fonteLarge ? 'text-base' : 'text-sm'
-  const txt2 = fonteLarge ? 'text-base' : 'text-sm'
+  const f = FONTE[fonteLevel ?? 0]
+  const [sharing, setSharing] = useState(false)
+
+  async function handleShare() {
+    setSharing(true)
+    try {
+      const imageFile = await generatePropostaShareImage(proposta)
+      const url  = 'https://gestao-e-luta.vercel.app/propostas'
+      const text = `Apoio essa proposta da Chapa GESTÃO E LUTA: "${proposta.titulo}". Conheça todas as propostas!`
+
+      if (navigator.share && navigator.canShare?.({ files: [imageFile] })) {
+        await navigator.share({ title: proposta.titulo, text, url, files: [imageFile] })
+      } else if (navigator.share) {
+        await navigator.share({ title: proposta.titulo, text, url })
+      } else {
+        const a = document.createElement('a')
+        a.href = URL.createObjectURL(imageFile)
+        a.download = imageFile.name
+        a.click()
+        await navigator.clipboard.writeText(url).catch(() => {})
+        alert('Imagem baixada!')
+      }
+    } catch (e) {
+      if (e?.name !== 'AbortError') {
+        console.error('Erro ao compartilhar:', e)
+        alert('Não foi possível compartilhar. Tente novamente.')
+      }
+    }
+    setSharing(false)
+  }
 
   return (
     <div className="bg-white dark:bg-navy-900 border border-slate-200 dark:border-navy-700 p-6
@@ -121,9 +157,9 @@ function PropostaCard({ proposta, userRating, communityData, submitting, onRate,
 
       {/* Header: ícone + título + nota comunitária */}
       <div className="flex items-start gap-3 mb-4">
-        <span className={`${fonteLarge ? 'text-3xl' : 'text-2xl'} shrink-0`}>{proposta.icone}</span>
+        <span style={{ fontSize: f.icone }} className="shrink-0 leading-none">{proposta.icone}</span>
         <div className="flex-1 min-w-0">
-          <h3 className={`font-heading ${fonteLarge ? 'text-lg' : 'text-base'} text-slate-900 dark:text-white tracking-wide leading-tight`}>
+          <h3 style={{ fontSize: f.titulo }} className="font-heading text-slate-900 dark:text-white tracking-wide leading-tight">
             {proposta.titulo}
           </h3>
           <div className="w-8 h-0.5 bg-gold-500 mt-1.5 group-hover:w-14 transition-all duration-300" />
@@ -143,19 +179,35 @@ function PropostaCard({ proposta, userRating, communityData, submitting, onRate,
         </div>
       )}
 
-      {/* Descrição — cor amarelada para melhor leitura no dark mode */}
-      <p className={`${txt} text-amber-200/90 dark:text-amber-200/80 text-slate-700 dark:!text-amber-200/90 leading-relaxed mb-4 flex-1`}>
+      {/* Descrição — tom amarelado no dark mode para melhor leitura */}
+      <p style={{ fontSize: f.descricao }} className="text-slate-700 dark:text-amber-200/90 leading-relaxed mb-4 flex-1">
         {proposta.descricao}
       </p>
 
-      <ul className="space-y-1.5 mb-2">
+      <ul className="space-y-1.5 mb-4">
         {proposta.pontos.map((pt, i) => (
-          <li key={i} className={`flex items-start gap-2 ${txt2} text-slate-700 dark:text-gray-300`}>
-            <CheckCircle2 size={fonteLarge ? 15 : 13} className="text-gold-500 shrink-0 mt-0.5" />
+          <li key={i} style={{ fontSize: f.pontos }} className="flex items-start gap-2 text-slate-700 dark:text-gray-300">
+            <CheckCircle2 size={f.check} className="text-gold-500 shrink-0 mt-0.5" />
             {pt}
           </li>
         ))}
       </ul>
+
+      {/* Botão compartilhar */}
+      <button
+        onClick={handleShare}
+        disabled={sharing}
+        className="w-full flex items-center justify-center gap-2 py-2.5 mt-1 mb-1
+                   border border-gold-500/40 text-gold-600 dark:text-gold-400
+                   hover:bg-gold-500 hover:text-navy-950 hover:border-gold-500
+                   font-heading text-xs tracking-widest uppercase
+                   transition-all duration-200 disabled:opacity-50 disabled:cursor-wait"
+      >
+        {sharing
+          ? <><Loader2 size={13} className="animate-spin" /> Gerando imagem…</>
+          : <><Share2 size={13} /> Compartilhar proposta</>
+        }
+      </button>
 
       <StarRating
         propostaId={proposta.id}
@@ -225,7 +277,7 @@ export default function PropostasPage() {
   )
   const [submitting, setSubmitting] = useState({}) // { [proposalId]: bool }
   const [pdfLoading, setPdfLoading] = useState(false)
-  const [fonteLarge, setFonteLarge] = useState(false)
+  const [fonteLevel, setFonteLevel] = useState(0) // 0 = normal, 1 = médio, 2 = grande
   const visitor = useVisitor()
   const { dark, toggle } = useTheme()
 
@@ -411,18 +463,22 @@ export default function PropostasPage() {
               </button>
             ))}
 
-            {/* Botão aumento de fonte */}
+            {/* Botão 3 níveis de fonte */}
             <button
-              onClick={() => setFonteLarge(f => !f)}
-              title="Aumentar / reduzir texto"
-              className={`flex-shrink-0 ml-auto flex items-center gap-1.5 font-heading text-xs tracking-widest uppercase px-3 py-2 transition-all border ${
-                fonteLarge
-                  ? 'bg-gold-500 text-navy-950 border-gold-500'
-                  : 'text-slate-600 dark:text-gray-400 hover:text-gold-500 border-slate-200 dark:border-navy-700'
-              }`}
+              onClick={() => setFonteLevel(l => (l + 1) % 3)}
+              title={['Fonte normal — clique para aumentar', 'Fonte média — clique para aumentar mais', 'Fonte grande — clique para voltar ao normal'][fonteLevel]}
+              className="flex-shrink-0 ml-auto flex items-center gap-0.5 px-3 py-2 border transition-all border-slate-200 dark:border-navy-700 hover:border-gold-500 hover:text-gold-500 text-slate-600 dark:text-gray-400"
             >
-              <span className="text-base font-bold leading-none">A</span>
-              <span className="text-xs font-bold leading-none">A</span>
+              {[0,1,2].map(i => (
+                <span
+                  key={i}
+                  className="font-heading font-bold leading-none transition-colors"
+                  style={{
+                    fontSize: `${10 + i * 3}px`,
+                    color: i <= fonteLevel ? '#d4af37' : undefined,
+                  }}
+                >A</span>
+              ))}
             </button>
           </div>
         </div>
@@ -447,7 +503,7 @@ export default function PropostasPage() {
                   communityData={communityMap[p.id] || { media: 0, total: 0, loading: false }}
                   submitting={!!submitting[p.id]}
                   onRate={handleRate}
-                  fonteLarge={fonteLarge}
+                  fonteLevel={fonteLevel}
                 />
               ))}
             </div>
@@ -474,6 +530,7 @@ export default function PropostasPage() {
                       communityData={communityMap[p.id] || { media: 0, total: 0, loading: false }}
                       submitting={!!submitting[p.id]}
                       onRate={handleRate}
+                      fonteLevel={fonteLevel}
                     />
                   ))}
                 </div>
