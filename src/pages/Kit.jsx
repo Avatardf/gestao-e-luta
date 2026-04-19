@@ -21,13 +21,45 @@ const cargoMap = {
   9: 'Cargos e Atribuições',
 }
 
+function getInitials(nome = '') {
+  return nome.split(' ').filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('')
+}
+
+// A tabela 'directors' pode ter o campo como 'foto' ou 'foto_url'
+function fotoSrc(dir) {
+  return dir.foto_url || dir.foto || null
+}
+
+function DiretorAvatar({ dir }) {
+  const src = fotoSrc(dir)
+  if (src) {
+    return (
+      <img
+        src={src}
+        alt={dir.nome}
+        className="w-12 h-12 rounded-full object-cover border border-gold-500/40 flex-shrink-0"
+      />
+    )
+  }
+  return (
+    <div className="w-12 h-12 rounded-full bg-navy-800 border border-gold-500/40 flex items-center justify-center flex-shrink-0">
+      <span className="font-heading text-gold-400 font-bold text-base leading-none">
+        {getInitials(dir.nome)}
+      </span>
+    </div>
+  )
+}
+
 // ─── KitCard ─────────────────────────────────────────────────────────────────
-function KitCard({ title, subtitle, format, emoji, onDownload, onShare, loading }) {
+function KitCard({ title, subtitle, format, emoji, avatarEl, onDownload, onShare, loading }) {
   return (
     <div className="bg-navy-900 border border-navy-700 hover:border-gold-500/40 transition-all duration-300 p-6 flex flex-col gap-4">
-      {/* Topo: emoji + badge de formato */}
+      {/* Topo: emoji/avatar + badge de formato */}
       <div className="flex items-start justify-between">
-        <span style={{ fontSize: 48 }} className="leading-none select-none">{emoji}</span>
+        {avatarEl
+          ? <div className="leading-none select-none">{avatarEl}</div>
+          : <span style={{ fontSize: 48 }} className="leading-none select-none">{emoji}</span>
+        }
         <span className="bg-gold-500/10 border border-gold-500/30 text-gold-400 font-heading text-xs tracking-widest px-2.5 py-1 uppercase">
           {format}
         </span>
@@ -229,8 +261,16 @@ export default function KitPage() {
               format="9:16"
               emoji="⏳"
               loading={!!generating['contagem-div']}
-              onDownload={() => handleDownload('contagem-div', generateContagemCard)}
-              onShare={() => handleShare('contagem-div', generateContagemCard, `Faltam poucos dias para a eleição do SINDPOL-RJ! Vote na Chapa 3 — GESTÃO E LUTA em 09 de maio. bit.ly/chapa3_sindpol`)}
+              onDownload={() => handleDownload('contagem-div', () => {
+                const pres = diretores.find(d => d.id === 1)
+                const vp   = diretores.find(d => d.id === 2)
+                return generateContagemCard({ presidenteFotoUrl: fotoSrc(pres ?? {}), vpFotoUrl: fotoSrc(vp ?? {}) })
+              })}
+              onShare={() => handleShare('contagem-div', () => {
+                const pres = diretores.find(d => d.id === 1)
+                const vp   = diretores.find(d => d.id === 2)
+                return generateContagemCard({ presidenteFotoUrl: fotoSrc(pres ?? {}), vpFotoUrl: fotoSrc(vp ?? {}) })
+              }, `Faltam poucos dias para a eleição do SINDPOL-RJ! Vote na Chapa 3 — GESTÃO E LUTA em 09 de maio. bit.ly/chapa3_sindpol`)}
             />
           </div>
         </section>
@@ -281,18 +321,19 @@ export default function KitPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-8">
               {diretores.map(dir => {
-                const cargoLabel = cargoMap[dir.cargo] || dir.cargo || 'Diretor'
-                const diretorObj = {
-                  ...dir,
-                  cargo: cargoLabel,
-                }
+                const rawCargo   = String(dir.cargo || '')
+                const cargoLabel = cargoMap[dir.cargo]
+                  || rawCargo.replace(/^Candidat[oa] a /i, '').trim()
+                  || 'Diretor'
+                // Normaliza o campo de foto (DB pode usar 'foto' ou 'foto_url')
+                const diretorObj = { ...dir, cargo: cargoLabel, foto_url: fotoSrc(dir) }
                 return (
                   <KitCard
                     key={dir.id}
                     title={dir.nome}
                     subtitle={cargoLabel}
                     format="1:1"
-                    emoji="👤"
+                    avatarEl={<DiretorAvatar dir={dir} />}
                     loading={!!generating[`diretor-${dir.id}`]}
                     onDownload={() => handleDownload(`diretor-${dir.id}`, () => generateDiretorCard(diretorObj))}
                     onShare={() => handleShare(
@@ -330,8 +371,16 @@ export default function KitPage() {
               format="9:16"
               emoji="⏳"
               loading={!!generating['contagem-el']}
-              onDownload={() => handleDownload('contagem-el', generateContagemCard)}
-              onShare={() => handleShare('contagem-el', generateContagemCard, `Faltam poucos dias para a eleição do SINDPOL-RJ! Vote na Chapa 3 — GESTÃO E LUTA em 09 de maio. bit.ly/chapa3_sindpol`)}
+              onDownload={() => handleDownload('contagem-el', () => {
+                const pres = diretores.find(d => d.id === 1)
+                const vp   = diretores.find(d => d.id === 2)
+                return generateContagemCard({ presidenteFotoUrl: fotoSrc(pres ?? {}), vpFotoUrl: fotoSrc(vp ?? {}) })
+              })}
+              onShare={() => handleShare('contagem-el', () => {
+                const pres = diretores.find(d => d.id === 1)
+                const vp   = diretores.find(d => d.id === 2)
+                return generateContagemCard({ presidenteFotoUrl: fotoSrc(pres ?? {}), vpFotoUrl: fotoSrc(vp ?? {}) })
+              }, `Faltam poucos dias para a eleição do SINDPOL-RJ! Vote na Chapa 3 — GESTÃO E LUTA em 09 de maio. bit.ly/chapa3_sindpol`)}
             />
           </div>
         </section>
