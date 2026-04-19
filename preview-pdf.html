@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Preview PDF — Gestão & Luta</title>
+<title>Preview PDF 2 páginas — Gestão & Luta</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -12,315 +12,310 @@
     background:#374151;
     font-family:'Inter',sans-serif;
     padding:20px;
-    display:flex;
-    justify-content:center;
+    display:flex; flex-direction:column; align-items:center; gap:30px;
   }
-  /* A4 portrait @ 96dpi */
+  .label {
+    color:#94a3b8; font-family:sans-serif; font-size:13px;
+    letter-spacing:2px; text-transform:uppercase;
+    align-self:flex-start; margin-left:calc(50% - 397px);
+  }
   .page {
-    width: 794px;
-    height: 1123px;
-    background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
-    color:#0f172a;
-    position:relative;
-    overflow:hidden;
+    width:794px; height:1123px;
+    background:linear-gradient(180deg,#f1f5f9 0%,#e2e8f0 100%);
+    color:#0f172a; position:relative; overflow:hidden;
     box-shadow:0 20px 60px rgba(0,0,0,0.5);
-    display:flex;
-    flex-direction:column;
-  }
-
-  /* ── HEADER — bandeira dourada ───────── */
-  .banner {
-    position:relative;
-    height: 145px;
-    background: linear-gradient(135deg, #0b1a2e 0%, #0f172a 45%, #1e293b 55%, #0b1a2e 100%);
-    overflow:hidden;
-    flex-shrink:0;
-  }
-  .banner::before, .banner::after {
-    content:'';
-    position:absolute; top:0; bottom:0; width:80px;
-    background: linear-gradient(135deg, #f4d06f, #d4af37 55%, #a8821c);
-    clip-path: polygon(0 0, 100% 0, 70% 100%, 0 100%);
-  }
-  .banner::before { left:0; }
-  .banner::after  { right:0; transform: scaleX(-1); }
-
-  .banner-inner {
-    position:relative; z-index:2;
-    height:100%;
-    display:flex; flex-direction:column; justify-content:center; align-items:center;
-    padding: 0 120px;
-    text-align:center;
-  }
-  .banner h1 {
-    font-family:'Oswald', sans-serif;
-    font-weight:700;
-    font-size: 36px;
-    letter-spacing: 3px;
-    color:#fff;
-    line-height:1.1;
-  }
-  .banner h1 .gold {
-    background: linear-gradient(180deg,#f4d06f 0%,#d4af37 50%,#a8821c 100%);
-    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-    background-clip:text;
-  }
-  .banner-sub {
-    margin-top: 10px;
-    font-family:'Oswald',sans-serif;
-    font-size: 13px;
-    letter-spacing: 4px;
-    color:#e2e8f0;
-    background: rgba(212,175,55,0.15);
-    border: 1px solid rgba(212,175,55,0.5);
-    padding: 5px 18px;
-    text-transform:uppercase;
-  }
-
-  /* ── SECTION TITLE ──────────────────── */
-  .section-title {
-    text-align:center;
-    padding: 22px 0 14px;
-    position:relative;
-  }
-  .section-title h2 {
-    font-family:'Oswald', sans-serif;
-    font-weight:700;
-    font-size: 28px;
-    letter-spacing: 4px;
-    color:#0f172a;
-    text-transform:uppercase;
-    display:inline-block;
-    position:relative;
-    padding: 0 20px;
-  }
-  .section-title h2::before,
-  .section-title h2::after {
-    content:'';
-    position:absolute; top:50%;
-    width: 50px; height:2px;
-    background: linear-gradient(90deg, transparent, #d4af37);
-  }
-  .section-title h2::before { right: 100%; transform: scaleX(-1); }
-  .section-title h2::after  { left: 100%; }
-
-  /* ── DIRETORIA ───────────────────────── */
-  .diretoria {
-    padding: 0 40px;
-    flex-shrink:0;
-  }
-  .diretoria-row {
-    display:flex; justify-content:center; gap:22px;
-    margin-bottom: 14px;
-  }
-  .diretoria-row.row2 { gap: 18px; }
-
-  .diretor {
-    width: 130px;
-    text-align:center;
-    flex-shrink:0;
-  }
-  .diretor .photo-ring {
-    width: 104px; height: 104px;
-    margin: 0 auto 8px;
-    border-radius:50%;
-    padding: 3px;
-    background: linear-gradient(135deg, #f4d06f 0%, #d4af37 50%, #a8821c 100%);
-    box-shadow: 0 6px 18px rgba(15,23,42,0.25);
-    position:relative;
-  }
-  .diretor .photo-ring::before {
-    content:'';
-    position:absolute; inset:-4px;
-    border-radius:50%;
-    border: 2px solid #0f172a;
-  }
-  .diretor .photo-inner {
-    width:100%; height:100%;
-    border-radius:50%;
-    background: #0f172a;
-    overflow:hidden;
-    display:flex; align-items:center; justify-content:center;
-    font-family:'Oswald',sans-serif;
-    font-weight:700;
-    color:#d4af37;
-    font-size:28px;
-  }
-  .diretor .photo-inner img {
-    width:100%; height:100%; object-fit:cover;
-  }
-  .diretor .nome {
-    font-family:'Oswald', sans-serif;
-    font-weight:600;
-    font-size: 14px;
-    letter-spacing:0.5px;
-    color:#0f172a;
-    line-height:1.1;
-  }
-  .diretor .cargo {
-    font-size: 10px;
-    color: #64748b;
-    font-weight:500;
-    margin-top: 2px;
-    line-height:1.2;
-  }
-
-  /* ── PROPOSTAS ───────────────────────── */
-  .propostas-wrap {
-    flex: 1;
-    padding: 8px 36px 0;
     display:flex; flex-direction:column;
   }
-  .propostas-grid {
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px 14px;
-    flex:1;
+
+  /* ─── BANNER (só página 1) ─── */
+  .banner {
+    position:relative; height:160px;
+    background:linear-gradient(135deg,#0b1a2e 0%,#0f172a 45%,#1e293b 55%,#0b1a2e 100%);
+    overflow:hidden; flex-shrink:0;
   }
-  .proposta {
-    display:flex; align-items:center; gap:10px;
-    background: #fff;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    padding: 8px 12px 8px 0;
-    box-shadow: 0 2px 6px rgba(15,23,42,0.06);
-    overflow:hidden;
-    position:relative;
+  .banner .corner-l, .banner .corner-r {
+    position:absolute; top:0; bottom:0; width:90px;
+    background:linear-gradient(135deg,#f4d06f,#d4af37 55%,#a8821c);
   }
-  .proposta .num-box {
-    width: 48px;
-    align-self: stretch;
-    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
-    color:#d4af37;
-    font-family:'Oswald',sans-serif;
-    font-weight:700;
-    font-size: 22px;
-    display:flex; align-items:center; justify-content:center;
-    flex-shrink:0;
-    position:relative;
+  .banner .corner-l { left:0; clip-path:polygon(0 0,100% 0,70% 100%,0 100%); }
+  .banner .corner-r { right:0; clip-path:polygon(30% 0,100% 0,100% 100%,0 100%); }
+  .banner-inner {
+    position:relative; z-index:2; height:100%;
+    display:flex; flex-direction:column; justify-content:center; align-items:center;
+    padding:0 130px; text-align:center; gap:2px;
   }
-  .proposta .num-box::after {
-    content:'';
-    position:absolute; right:-10px; top:0; bottom:0; width:10px;
-    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
-    clip-path: polygon(0 0, 100% 50%, 0 100%);
+  .banner-inner h1 {
+    font-family:'Oswald',sans-serif; font-weight:700;
+    font-size:44px; letter-spacing:4px; line-height:1.1;
   }
-  .proposta .icon {
-    font-size: 22px;
-    margin-left: 14px;
-    flex-shrink:0;
+  .banner-inner h1.white { color:#fff; }
+  .banner-inner h1.gold {
+    background:linear-gradient(180deg,#f4d06f 0%,#d4af37 50%,#a8821c 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
   }
-  .proposta .titulo {
-    flex:1;
-    font-family:'Oswald', sans-serif;
-    font-weight:600;
-    font-size: 12.5px;
-    letter-spacing: 0.3px;
-    color: #0f172a;
-    line-height: 1.2;
-    text-transform: uppercase;
-  }
-  .proposta .titulo small {
-    display:block;
-    font-family:'Inter',sans-serif;
-    font-weight:500;
-    font-size: 9.5px;
-    color:#64748b;
-    letter-spacing: 0;
-    text-transform: none;
-    margin-top: 2px;
-    line-height:1.3;
+  .banner-sub {
+    margin-top:10px; font-family:'Oswald',sans-serif;
+    font-size:11px; letter-spacing:3px; color:#e2e8f0;
+    background:rgba(212,175,55,0.15); border:1px solid rgba(212,175,55,0.5);
+    padding:5px 18px; text-transform:uppercase;
   }
 
-  /* ── FOOTER ──────────────────────────── */
-  .footer {
-    padding: 14px 36px 16px;
-    background: linear-gradient(135deg, #0b1a2e 0%, #0f172a 50%, #1e293b 100%);
-    color:#fff;
+  /* ─── Cabeçalho simples página 2 ─── */
+  .header-p2 {
+    background:linear-gradient(135deg,#0b1a2e 0%,#0f172a 50%,#1e293b 100%);
+    padding:14px 36px;
     display:flex; align-items:center; justify-content:space-between;
-    border-top: 3px solid #d4af37;
+    border-bottom:3px solid #d4af37; flex-shrink:0;
+  }
+  .header-p2 .logo {
+    display:flex; align-items:center; gap:10px;
+  }
+  .header-p2 .logo-sq {
+    width:38px; height:38px;
+    background:linear-gradient(135deg,#f4d06f,#d4af37 55%,#a8821c);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Oswald',sans-serif; font-weight:700; color:#0f172a; font-size:14px;
+  }
+  .header-p2 .logo-txt {
+    font-family:'Oswald',sans-serif; font-weight:600;
+    letter-spacing:3px; font-size:15px; color:#fff;
+  }
+  .header-p2 .logo-txt span { color:#d4af37; }
+  .header-p2 .chapa-badge {
+    font-family:'Oswald',sans-serif; font-weight:700;
+    font-size:20px; letter-spacing:3px; color:#d4af37;
+  }
+
+  /* ─── SECTION TITLE ─── */
+  .sec-title { text-align:center; padding:16px 0 10px; flex-shrink:0; }
+  .sec-title h2 {
+    font-family:'Oswald',sans-serif; font-weight:700;
+    font-size:24px; letter-spacing:4px; color:#0f172a; text-transform:uppercase;
+    display:inline-block; position:relative; padding:0 28px;
+  }
+  .sec-title h2::before, .sec-title h2::after {
+    content:''; position:absolute; top:50%;
+    width:40px; height:2px;
+    background:linear-gradient(90deg,transparent,#d4af37);
+  }
+  .sec-title h2::before { right:100%; transform:scaleX(-1); }
+  .sec-title h2::after  { left:100%; }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    padding:11px 36px 13px;
+    background:linear-gradient(135deg,#0b1a2e 0%,#0f172a 50%,#1e293b 100%);
+    display:flex; align-items:center; justify-content:space-between;
+    border-top:3px solid #d4af37; flex-shrink:0;
+  }
+  .vote-btn {
+    display:inline-flex; align-items:center; gap:8px; padding:9px 20px;
+    background:linear-gradient(135deg,#f4d06f,#d4af37 55%,#a8821c);
+    color:#0f172a; font-family:'Oswald',sans-serif;
+    font-weight:700; font-size:17px; letter-spacing:3px;
+  }
+  .footer-right { text-align:right; font-family:'Oswald',sans-serif; }
+  .footer-right .data { font-size:13px; letter-spacing:2px; color:#d4af37; font-weight:600; }
+  .footer-right .pg   { font-size:10px; letter-spacing:2px; color:#64748b; margin-top:2px; }
+
+  /* ═══ PÁGINA 1 ═══ */
+  .diretoria { padding:0 30px; flex-shrink:0; }
+  .dir-row { display:flex; justify-content:center; margin-bottom:8px; }
+  .diretor { width:148px; text-align:center; flex-shrink:0; padding:0 4px; }
+  .photo-ring {
+    width:108px; height:108px; margin:0 auto 8px; border-radius:50%;
+    padding:3px; position:relative;
+    background:linear-gradient(135deg,#f4d06f 0%,#d4af37 50%,#a8821c 100%);
+    box-shadow:0 6px 20px rgba(15,23,42,0.2);
+  }
+  .photo-ring::before {
+    content:''; position:absolute; inset:-4px;
+    border-radius:50%; border:2px solid #0f172a;
+  }
+  .photo-inner {
+    width:100%; height:100%; border-radius:50%; background:#0f172a;
+    overflow:hidden; display:flex; align-items:center; justify-content:center;
+    font-family:'Oswald',sans-serif; font-weight:700; color:#d4af37; font-size:28px;
+  }
+  .photo-inner img { width:100%; height:100%; object-fit:cover; }
+  .dir-nome {
+    font-family:'Oswald',sans-serif; font-weight:600;
+    font-size:14px; letter-spacing:0.5px; color:#0f172a; line-height:1.15;
+  }
+  .dir-cargo { font-size:10px; color:#64748b; font-weight:500; margin-top:2px; line-height:1.25; }
+
+  /* Pilares */
+  .pilares { padding:10px 36px 0; display:flex; flex-direction:column; gap:8px; }
+  .pilar {
+    display:flex; align-items:flex-start; gap:14px;
+    background:#fff; border:1px solid #cbd5e1;
+    border-radius:6px; padding:12px 16px;
+    box-shadow:0 2px 6px rgba(15,23,42,0.06);
+  }
+  .pilar-num {
+    font-family:'Oswald',sans-serif; font-weight:700;
+    font-size:32px; color:#d4af37; opacity:0.5;
+    line-height:1; flex-shrink:0; width:38px;
+  }
+  .pilar-body {}
+  .pilar-titulo {
+    font-family:'Oswald',sans-serif; font-weight:700;
+    font-size:15px; letter-spacing:2px; color:#0f172a;
+    text-transform:uppercase; margin-bottom:3px;
+  }
+  .pilar-desc { font-size:11px; color:#475569; line-height:1.5; }
+
+  /* ═══ PÁGINA 2 ═══ */
+  .props-body {
+    flex:1; padding:4px 32px 8px;
+    display:grid; grid-template-columns:1fr 1fr; gap:8px 16px;
+  }
+  .tema-col { display:flex; flex-direction:column; gap:8px; }
+  .tema-hdr {
+    display:flex; align-items:center; gap:8px;
+    padding:7px 12px 7px 14px;
+    background:linear-gradient(135deg,#0f172a,#1e293b);
+    border-left:4px solid #d4af37; border-radius:4px;
     flex-shrink:0;
   }
-  .vote {
-    display:inline-flex; align-items:center; gap:10px;
-    padding: 10px 22px;
-    background: linear-gradient(135deg, #f4d06f, #d4af37 55%, #a8821c);
-    color:#0f172a;
-    font-family:'Oswald',sans-serif;
-    font-weight:700;
-    font-size: 18px;
-    letter-spacing: 3px;
+  .tema-hdr .tema-icon { font-size:16px; }
+  .tema-hdr .tema-label {
+    font-family:'Oswald',sans-serif; font-weight:600;
+    font-size:11px; letter-spacing:2px; color:#d4af37; text-transform:uppercase;
   }
-  .footer-right {
-    text-align:right;
-    font-family:'Oswald',sans-serif;
+  .proposta {
+    display:flex; align-items:stretch;
+    background:#fff; border:1px solid #cbd5e1;
+    border-radius:6px; overflow:hidden;
+    box-shadow:0 2px 6px rgba(15,23,42,0.07);
   }
-  .footer-right .data {
-    font-size: 14px;
-    letter-spacing: 2px;
-    color:#d4af37;
-    font-weight:600;
+  .prop-num {
+    width:50px; flex-shrink:0;
+    background:linear-gradient(180deg,#0f172a 0%,#1e293b 100%);
+    color:#d4af37; font-family:'Oswald',sans-serif;
+    font-weight:700; font-size:24px;
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
   }
-  .footer-right .site {
-    font-size: 11px;
-    letter-spacing: 2px;
-    color:#94a3b8;
-    margin-top: 2px;
+  .prop-num::after {
+    content:''; position:absolute; right:-10px; top:0; bottom:0; width:10px;
+    background:linear-gradient(180deg,#0f172a 0%,#1e293b 100%);
+    clip-path:polygon(0 0,100% 50%,0 100%);
   }
+  .prop-body { flex:1; padding:9px 12px 9px 20px; display:flex; flex-direction:column; justify-content:center; }
+  .prop-titulo {
+    font-family:'Oswald',sans-serif; font-weight:600;
+    font-size:13px; letter-spacing:0.3px;
+    color:#0f172a; line-height:1.2; text-transform:uppercase;
+  }
+  .prop-desc { font-size:10.5px; color:#475569; font-weight:500; margin-top:3px; line-height:1.4; }
 </style>
 </head>
 <body>
-<div class="page">
 
-  <!-- BANNER HEADER -->
+<!-- ═══ PÁGINA 1 ═══ -->
+<div class="label">Página 1 — Diretores</div>
+<div class="page" id="page1">
+
   <div class="banner">
+    <div class="corner-l"></div><div class="corner-r"></div>
     <div class="banner-inner">
-      <h1>CHAPA 3</h1>
-      <h1><span class="gold">GESTÃO &amp; LUTA</span></h1>
-      <div class="banner-sub">EXPERIÊNCIA E COMPROMISSO COM A POLÍCIA CIVIL</div>
+      <h1 class="white">CHAPA 3</h1>
+      <h1 class="gold">GESTÃO &amp; LUTA</h1>
+      <div class="banner-sub">GESTÃO PARA ORGANIZAR &nbsp;|&nbsp; LUTA PARA VENCER</div>
     </div>
   </div>
 
-  <!-- DIRETORIA EXECUTIVA -->
-  <div class="section-title"><h2>Diretoria Executiva</h2></div>
+  <div class="sec-title"><h2>Diretoria Executiva</h2></div>
+
   <div class="diretoria">
-    <div class="diretoria-row" id="dir-row-1"></div>
-    <div class="diretoria-row row2" id="dir-row-2"></div>
+    <div class="dir-row" id="dir-row-1"></div>
+    <div class="dir-row" id="dir-row-2"></div>
   </div>
 
-  <!-- PROPOSTAS -->
-  <div class="section-title"><h2>Nossas 12 Propostas</h2></div>
-  <div class="propostas-wrap">
-    <div class="propostas-grid">
-      <div class="proposta"><div class="num-box">1</div><div class="icon">⚖️</div><div class="titulo">Resgate da ACP<small>Execução das promoções atrasadas</small></div></div>
-      <div class="proposta"><div class="num-box">7</div><div class="icon">🚔</div><div class="titulo">Efetivo Mínimo nos Plantões<small>Fim da sobrecarga — cumprimento da lei</small></div></div>
-
-      <div class="proposta"><div class="num-box">2</div><div class="icon">💰</div><div class="titulo">Recomposição Salarial<small>Parcelas da Lei 9.436/2021 já!</small></div></div>
-      <div class="proposta"><div class="num-box">8</div><div class="icon">🏅</div><div class="titulo">Promoções por Bravura<small>Critérios claros, sem favorecimento</small></div></div>
-
-      <div class="proposta"><div class="num-box">3</div><div class="icon">📊</div><div class="titulo">Adequação das Carreiras<small>Comissário 1250, GHP, Oficial nível superior</small></div></div>
-      <div class="proposta"><div class="num-box">9</div><div class="icon">🏗️</div><div class="titulo">Reformas de Delegacias<small>Parcerias público-privadas</small></div></div>
-
-      <div class="proposta"><div class="num-box">4</div><div class="icon">📋</div><div class="titulo">Regulamentação dos Direitos<small>Adicional Noturno, Insalubridade, Auxílios</small></div></div>
-      <div class="proposta"><div class="num-box">10</div><div class="icon">🏛️</div><div class="titulo">Delegacias no Interior<small>Fim da desigualdade capital × interior</small></div></div>
-
-      <div class="proposta"><div class="num-box">5</div><div class="icon">🛡️</div><div class="titulo">Previdência Pós-2013<small>Paridade para todos os ingressos</small></div></div>
-      <div class="proposta"><div class="num-box">11</div><div class="icon">🎓</div><div class="titulo">Cursos e Palestras<small>Capacitação para ativos e aposentados</small></div></div>
-
-      <div class="proposta"><div class="num-box">6</div><div class="icon">🏥</div><div class="titulo">Plano de Saúde Autogestão<small>Modelo similar ao PF Saúde</small></div></div>
-      <div class="proposta"><div class="num-box">12</div><div class="icon">🔒</div><div class="titulo">Equipamentos e Segurança<small>Proteção da integridade de cada policial</small></div></div>
+  <div class="sec-title" style="padding:12px 0 6px;"><h2>Nossos Pilares</h2></div>
+  <div class="pilares">
+    <div class="pilar">
+      <div class="pilar-num">01</div>
+      <div class="pilar-body">
+        <div class="pilar-titulo">Integridade</div>
+        <div class="pilar-desc">Conduta ética e irretocável em cada decisão, sem favorecimento nem política — porque o sindicalizado merece representantes honestos.</div>
+      </div>
+    </div>
+    <div class="pilar">
+      <div class="pilar-num">02</div>
+      <div class="pilar-body">
+        <div class="pilar-titulo">Compromisso</div>
+        <div class="pilar-desc">Cada proposta tem prazo e responsável definidos. Cobrança pública dos resultados a cada 6 meses.</div>
+      </div>
+    </div>
+    <div class="pilar">
+      <div class="pilar-num">03</div>
+      <div class="pilar-body">
+        <div class="pilar-titulo">Resultado</div>
+        <div class="pilar-desc">Histórico comprovado de conquistas. Não promessas — entregas. O sindicalizado merece ver mudanças reais.</div>
+      </div>
     </div>
   </div>
 
-  <!-- FOOTER -->
+  <div style="flex:1;"></div>
+
   <div class="footer">
-    <div class="vote">★ VOTE CHAPA 3</div>
+    <div class="vote-btn">★ VOTE CHAPA 3</div>
     <div class="footer-right">
       <div class="data">ELEIÇÃO: 09.05.2026</div>
-      <div class="site">GESTAOLUTASINDPOL.COM.BR</div>
+      <div class="pg">PÁGINA 1 DE 2</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PÁGINA 2 ═══ -->
+<div class="label">Página 2 — Propostas</div>
+<div class="page" id="page2">
+
+  <div class="header-p2">
+    <div class="logo">
+      <div class="logo-sq">GL</div>
+      <div class="logo-txt">GESTÃO <span>&amp;</span> LUTA</div>
+    </div>
+    <div class="chapa-badge">CHAPA 3</div>
+  </div>
+
+  <div class="sec-title"><h2>Nossas 12 Propostas</h2></div>
+
+  <div class="props-body">
+    <div class="tema-col">
+      <div class="tema-hdr"><span class="tema-icon">💰</span><span class="tema-label">Valorização Salarial</span></div>
+      <div class="proposta"><div class="prop-num">1</div><div class="prop-body"><div class="prop-titulo">Resgate da ACP das Promoções</div><div class="prop-desc">Execução imediata da vitória judicial para regularizar as promoções atrasadas e pagar a correção devida.</div></div></div>
+      <div class="proposta"><div class="prop-num">2</div><div class="prop-body"><div class="prop-titulo">Recomposição Salarial Já!</div><div class="prop-desc">Pagamento integral das parcelas devidas da Lei 9.436/2021, com pressão permanente no TJ e na Alerj.</div></div></div>
+      <div class="proposta"><div class="prop-num">3</div><div class="prop-body"><div class="prop-titulo">Adequação das Carreiras</div><div class="prop-desc">Comissário ao índice 1250, GHP no Triênio e Grat. Nível Superior ao Oficial de Polícia.</div></div></div>
+      <div class="proposta"><div class="prop-num">4</div><div class="prop-body"><div class="prop-titulo">Regulamentação dos Direitos</div><div class="prop-desc">Adicional Noturno, Insalubridade, Auxílio-Saúde, Auxílio-Moradia e Horas Extras efetivados.</div></div></div>
+
+      <div class="tema-hdr"><span class="tema-icon">🛡️</span><span class="tema-label">Previdência e Legislação</span></div>
+      <div class="proposta"><div class="prop-num">5</div><div class="prop-body"><div class="prop-titulo">Plano de Saúde de Autogestão</div><div class="prop-desc">Modelo similar ao PF Saúde — cobertura para ativos, aposentados e dependentes, com gestão autônoma.</div></div></div>
+      <div class="proposta"><div class="prop-num">6</div><div class="prop-body"><div class="prop-titulo">Regulamentação Pós-2013</div><div class="prop-desc">Paridade previdenciária para todos os policiais, independente da data de ingresso.</div></div></div>
+    </div>
+
+    <div class="tema-col">
+      <div class="tema-hdr"><span class="tema-icon">⚖️</span><span class="tema-label">Proteção Jurídica</span></div>
+      <div class="proposta"><div class="prop-num">7</div><div class="prop-body"><div class="prop-titulo">Efetivo Mínimo nos Plantões</div><div class="prop-desc">Cumprimento da lei que garante o efetivo mínimo, pondo fim à sobrecarga que adoece o policial civil.</div></div></div>
+      <div class="proposta"><div class="prop-num">8</div><div class="prop-body"><div class="prop-titulo">Promoções por Bravura</div><div class="prop-desc">Critérios claros, objetivos e transparentes — sem favorecimento, com reconhecimento real do mérito.</div></div></div>
+      <div class="proposta"><div class="prop-num">9</div><div class="prop-body"><div class="prop-titulo">Equipamentos e Segurança</div><div class="prop-desc">Garantia dos meios necessários ao exercício da função e proteção da integridade física de cada policial.</div></div></div>
+
+      <div class="tema-hdr"><span class="tema-icon">🏛️</span><span class="tema-label">Estrutura e Representatividade</span></div>
+      <div class="proposta"><div class="prop-num">10</div><div class="prop-body"><div class="prop-titulo">Reformas de Delegacias</div><div class="prop-desc">Parcerias público-privadas para modernização e melhores condições de trabalho em todo o estado.</div></div></div>
+      <div class="proposta"><div class="prop-num">11</div><div class="prop-body"><div class="prop-titulo">Delegacias Sindicais no Interior</div><div class="prop-desc">Representatividade real — fim da desigualdade entre capital e interior do estado.</div></div></div>
+      <div class="proposta"><div class="prop-num">12</div><div class="prop-body"><div class="prop-titulo">Cursos e Palestras</div><div class="prop-desc">Capacitação profissional e jurídica para ativos e aposentados, com parcerias institucionais sérias.</div></div></div>
     </div>
   </div>
 
+  <div class="footer">
+    <div class="vote-btn">★ VOTE CHAPA 3</div>
+    <div class="footer-right">
+      <div class="data">ELEIÇÃO: 09.05.2026</div>
+      <div class="pg">PÁGINA 2 DE 2</div>
+    </div>
+  </div>
 </div>
 
 <script type="module">
@@ -329,27 +324,22 @@
     'https://lhstwgmqmeuwkcjkzqbw.supabase.co',
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxoc3R3Z21xbWV1d2tjamt6cWJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyOTQ2MjEsImV4cCI6MjA5MTg3MDYyMX0.PNu3wBD8R-Q70rKAZUNCgdTg4wLO2fBsF_oHAr5WRR0'
   )
-
   const cargoMap = {
     1:'Presidente', 2:'Vice-Presidente', 3:'Secretário', 4:'Tesoureira',
     5:'Diretor Jurídico', 6:'Rel. Institucionais', 7:'Diretor de Inativos',
     8:'Diretor do Interior', 9:'Cargos e Atribuições',
   }
-
   const { data } = await supabase.from('directors').select('*').order('id')
-
   function card(d) {
     const initials = d.nome.split(' ').slice(0,2).map(n=>n[0]).join('')
     const cargo = cargoMap[d.id] || d.cargo.replace(/^candidat[ao] a /i,'')
     const avatar = d.foto ? `<img src="${d.foto}" alt="${d.nome}">` : initials
-    return `
-      <div class="diretor">
-        <div class="photo-ring"><div class="photo-inner">${avatar}</div></div>
-        <div class="nome">${d.nome}</div>
-        <div class="cargo">${cargo}</div>
-      </div>`
+    return `<div class="diretor">
+      <div class="photo-ring"><div class="photo-inner">${avatar}</div></div>
+      <div class="dir-nome">${d.nome}</div>
+      <div class="dir-cargo">${cargo}</div>
+    </div>`
   }
-
   document.getElementById('dir-row-1').innerHTML = data.slice(0,4).map(card).join('')
   document.getElementById('dir-row-2').innerHTML = data.slice(4,9).map(card).join('')
 </script>
