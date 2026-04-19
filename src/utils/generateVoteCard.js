@@ -109,90 +109,87 @@ export async function generateVoteCard() {
   // ════════════════════════════════════════════════════════════════════════════
   fadeLine(ctx, 222, 80, W - 80, 0.55)
 
+  // ── Deslocamento de +32 px em relação à versão anterior ─────────────────────
+  // Cria respiro entre o cabeçalho GESTÃO & LUTA e a seção da data
+
   // VOTE EM
   ctx.fillStyle     = 'rgba(255,255,255,0.55)'
   ctx.font          = '500 38px "Oswald", sans-serif'
   ctx.letterSpacing = '0.22em'
-  ctx.fillText('VOTE EM', W / 2, 278)
+  ctx.fillText('VOTE EM', W / 2, 310)
   ctx.letterSpacing = '0'
 
-  // 09 DE MAIO DE 2026 — LINHA ÚNICA
-  const dateG = ctx.createLinearGradient(0, 310, 0, 400)
-  dateG.addColorStop(0,    '#FDE99A')
-  dateG.addColorStop(0.45, '#D4AF37')
-  dateG.addColorStop(1,    '#8B6914')
-  ctx.fillStyle     = dateG
+  // 09 DE MAIO DE 2026 — LINHA ÚNICA, cor branca
+  ctx.fillStyle     = 'rgba(255,255,255,0.95)'
   ctx.font          = 'bold 82px "Oswald", sans-serif'
   ctx.letterSpacing = '0.03em'
-  ctx.fillText('09 DE MAIO DE 2026', W / 2, 392)
+  ctx.fillText('09 DE MAIO DE 2026', W / 2, 424)
   ctx.letterSpacing = '0'
 
   // · 9H30 ·
   ctx.fillStyle     = '#D4AF37'
   ctx.font          = '600 38px "Oswald", sans-serif'
   ctx.letterSpacing = '0.18em'
-  ctx.fillText('·   9H30   ·', W / 2, 444)
+  ctx.fillText('·   9H30   ·', W / 2, 476)
   ctx.letterSpacing = '0'
 
   // ════════════════════════════════════════════════════════════════════════════
-  // LOCAL  (y=462…562)
+  // LOCAL
   // ════════════════════════════════════════════════════════════════════════════
-  fadeLine(ctx, 466, 100, W - 100, 0.50)
+  fadeLine(ctx, 498, 100, W - 100, 0.50)
 
   ctx.fillStyle     = 'rgba(255,255,255,0.50)'
   ctx.font          = '500 24px "Oswald", sans-serif'
   ctx.letterSpacing = '0.14em'
-  ctx.fillText('SEDE DO SINDPOL-RJ', W / 2, 516)
+  ctx.fillText('SEDE DO SINDPOL-RJ', W / 2, 548)
   ctx.letterSpacing = '0'
 
-  fadeLine(ctx, 550, 220, W - 220, 0.30)
+  fadeLine(ctx, 582, 220, W - 220, 0.30)
 
   // ════════════════════════════════════════════════════════════════════════════
-  // CANDIDATOS  (y=558…740)
+  // CANDIDATOS
   // ════════════════════════════════════════════════════════════════════════════
 
-  // Rótulo NOSSA CHAPA
   ctx.fillStyle     = 'rgba(212,175,55,0.55)'
   ctx.font          = '600 20px "Oswald", sans-serif'
   ctx.letterSpacing = '0.22em'
-  ctx.fillText('NOSSA CHAPA', W / 2, 592)
+  ctx.fillText('NOSSA CHAPA', W / 2, 624)
   ctx.letterSpacing = '0'
 
-  // Divisor vertical central
   ctx.save()
   ctx.strokeStyle = 'rgba(212,175,55,0.30)'
   ctx.lineWidth   = 1.5
-  ctx.beginPath(); ctx.moveTo(W / 2, 600); ctx.lineTo(W / 2, 726); ctx.stroke()
+  ctx.beginPath(); ctx.moveTo(W / 2, 632); ctx.lineTo(W / 2, 758); ctx.stroke()
   ctx.restore()
 
   // LUIZ CLÁUDIO — esquerda
   ctx.fillStyle     = '#FFFFFF'
   ctx.font          = 'bold 50px "Oswald", sans-serif'
   ctx.letterSpacing = '0.03em'
-  ctx.fillText('LUIZ CLÁUDIO', W / 4, 662)
+  ctx.fillText('LUIZ CLÁUDIO', W / 4, 694)
   ctx.fillStyle     = '#D4AF37'
   ctx.font          = '600 22px "Oswald", sans-serif'
   ctx.letterSpacing = '0.18em'
-  ctx.fillText('PRESIDENTE', W / 4, 698)
+  ctx.fillText('PRESIDENTE', W / 4, 730)
   ctx.letterSpacing = '0'
 
   // MÁRCIA BEZERRA — direita
   ctx.fillStyle     = '#FFFFFF'
   ctx.font          = 'bold 50px "Oswald", sans-serif'
   ctx.letterSpacing = '0.03em'
-  ctx.fillText('MÁRCIA BEZERRA', (W * 3) / 4, 662)
+  ctx.fillText('MÁRCIA BEZERRA', (W * 3) / 4, 694)
   ctx.fillStyle     = '#D4AF37'
   ctx.font          = '600 22px "Oswald", sans-serif'
   ctx.letterSpacing = '0.18em'
-  ctx.fillText('VICE-PRESIDENTE', (W * 3) / 4, 698)
+  ctx.fillText('VICE-PRESIDENTE', (W * 3) / 4, 730)
   ctx.letterSpacing = '0'
 
-  fadeLine(ctx, 730, 80, W - 80, 0.45)
+  fadeLine(ctx, 762, 80, W - 80, 0.45)
 
   // ════════════════════════════════════════════════════════════════════════════
-  // CTA + URL  (y=754…940)
+  // CTA + URL
   // ════════════════════════════════════════════════════════════════════════════
-  const ctaW = W - 140, ctaH = 82, ctaX = 70, ctaY = 758
+  const ctaW = W - 140, ctaH = 82, ctaX = 70, ctaY = 790
   ctx.fillStyle    = goldGrad(ctx, ctaX, ctaW)
   ctx.fillRect(ctaX, ctaY, ctaW, ctaH)
   ctx.fillStyle     = '#07111F'
@@ -206,13 +203,13 @@ export async function generateVoteCard() {
   ctx.fillStyle     = '#D4AF37'
   ctx.font          = 'bold 36px "Oswald", sans-serif'
   ctx.letterSpacing = '0.08em'
-  ctx.fillText('bit.ly/chapa3_sindpol', W / 2, 900)
+  ctx.fillText('bit.ly/chapa3_sindpol', W / 2, 932)
   ctx.letterSpacing = '0'
 
   // ════════════════════════════════════════════════════════════════════════════
-  // RODAPÉ  (y=940…1064)
+  // RODAPÉ
   // ════════════════════════════════════════════════════════════════════════════
-  fadeLine(ctx, 944, 200, W - 200, 0.25)
+  fadeLine(ctx, 976, 200, W - 200, 0.25)
 
   ctx.fillStyle     = 'rgba(212,175,55,0.38)'
   ctx.font          = '500 18px "Oswald", sans-serif'
