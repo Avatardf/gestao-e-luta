@@ -11,6 +11,7 @@ import Noticias from './components/Noticias'
 import Footer from './components/Footer'
 import Admin from './pages/Admin'
 import PropostasPage from './pages/Propostas'
+import KitPage from './pages/Kit'
 import { useVisitor } from './hooks/useVisitor'
 
 function Site() {
@@ -51,6 +52,7 @@ export default function App() {
           <Route path="/"      element={<Site />} />
           <Route path="/admin"     element={<Admin />} />
           <Route path="/propostas" element={<PropostasPage />} />
+          <Route path="/kit"       element={<KitPage />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
