@@ -16,22 +16,41 @@ function wrapText(ctx, text, maxWidth) {
   return lines
 }
 
-// Desenha texto com quebra automática e retorna Y final
 function drawWrapped(ctx, text, x, y, maxWidth, lineHeight) {
   const lines = wrapText(ctx, text, maxWidth)
-  for (const ln of lines) {
-    ctx.fillText(ln, x, y)
-    y += lineHeight
-  }
+  for (const ln of lines) { ctx.fillText(ln, x, y); y += lineHeight }
   return y
 }
 
-// Mapa de temas → rótulo
+// Gradiente dourado horizontal reutilizável
+function goldGrad(ctx, x, w) {
+  const g = ctx.createLinearGradient(x, 0, x + w, 0)
+  g.addColorStop(0,    '#7A5C10')
+  g.addColorStop(0.25, '#C9A227')
+  g.addColorStop(0.50, '#F0C84A')
+  g.addColorStop(0.75, '#C9A227')
+  g.addColorStop(1,    '#7A5C10')
+  return g
+}
+
+// Linha fade dourada horizontal
+function fadeLine(ctx, y, x0, x1) {
+  const g = ctx.createLinearGradient(x0, 0, x1, 0)
+  g.addColorStop(0,   'rgba(201,162,39,0)')
+  g.addColorStop(0.3, 'rgba(201,162,39,0.7)')
+  g.addColorStop(0.7, 'rgba(201,162,39,0.7)')
+  g.addColorStop(1,   'rgba(201,162,39,0)')
+  ctx.save()
+  ctx.strokeStyle = g; ctx.lineWidth = 1.5
+  ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke()
+  ctx.restore()
+}
+
 const TEMA_LABEL = {
-  salarial:   'Valorização Salarial',
-  juridico:   'Proteção Jurídica',
-  previdencia:'Previdência e Legislação',
-  estrutura:  'Estrutura e Representatividade',
+  salarial:    'Valorização Salarial',
+  juridico:    'Proteção Jurídica',
+  previdencia: 'Previdência e Legislação',
+  estrutura:   'Estrutura e Representatividade',
 }
 
 export async function generatePropostaShareImage(proposta) {
@@ -40,252 +59,247 @@ export async function generatePropostaShareImage(proposta) {
   const W = 1080
   const H = 1920
   const canvas = document.createElement('canvas')
-  canvas.width  = W
-  canvas.height = H
+  canvas.width = W; canvas.height = H
   const ctx = canvas.getContext('2d')
 
-  // ── Gradiente de fundo navy ─────────────────────────────────────────────────
+  // ── Fundo navy com gradiente ────────────────────────────────────────────────
   const bgG = ctx.createLinearGradient(0, 0, 0, H)
-  bgG.addColorStop(0,    '#0F2340')
-  bgG.addColorStop(0.40, '#07111F')
-  bgG.addColorStop(0.65, '#060E1C')
+  bgG.addColorStop(0,    '#112038')
+  bgG.addColorStop(0.45, '#07111F')
+  bgG.addColorStop(0.70, '#060E1C')
   bgG.addColorStop(1,    '#0D1D36')
-  ctx.fillStyle = bgG
-  ctx.fillRect(0, 0, W, H)
+  ctx.fillStyle = bgG; ctx.fillRect(0, 0, W, H)
 
   // Textura diagonal sutil
   ctx.save()
-  ctx.strokeStyle = 'rgba(30,80,160,0.08)'
+  ctx.strokeStyle = 'rgba(40,100,200,0.07)'
   ctx.lineWidth = 1
-  for (let i = -H; i < W + H; i += 54) {
+  for (let i = -H; i < W + H; i += 60) {
     ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + H, H); ctx.stroke()
   }
   ctx.restore()
 
-  // ── Barras douradas topo/rodapé ─────────────────────────────────────────────
-  const barG = ctx.createLinearGradient(0, 0, W, 0)
-  barG.addColorStop(0,   '#7A5C10')
-  barG.addColorStop(0.25,'#C9A227')
-  barG.addColorStop(0.5, '#F0C84A')
-  barG.addColorStop(0.75,'#C9A227')
-  barG.addColorStop(1,   '#7A5C10')
-  ctx.fillStyle = barG
-  ctx.fillRect(0,   0, W, 10)
-  ctx.fillRect(0, H-10, W, 10)
+  // ── Barras douradas topo e rodapé (16px) ────────────────────────────────────
+  ctx.fillStyle = goldGrad(ctx, 0, W)
+  ctx.fillRect(0, 0, W, 16)
+  ctx.fillRect(0, H - 16, W, 16)
 
-  // ── Cabeçalho: CHAPA 3 + GESTÃO & LUTA ─────────────────────────────────────
+  // ── BLOCO SUPERIOR: cabeçalho da chapa ─────────────────────────────────────
+  // Fundo semitransparente para o header
+  ctx.fillStyle = 'rgba(0,0,0,0.25)'
+  ctx.fillRect(0, 16, W, 340)
+
   ctx.textAlign = 'center'
   ctx.textBaseline = 'alphabetic'
 
-  // Badge SINDPOL
-  ctx.fillStyle = 'rgba(201,162,39,0.07)'
-  ctx.strokeStyle = 'rgba(201,162,39,0.30)'
-  ctx.lineWidth = 1
-  ctx.beginPath()
-  ctx.rect(200, 28, 680, 54)
-  ctx.fill(); ctx.stroke()
-
-  ctx.fillStyle = '#FFFFFF'
-  ctx.font = '500 22px "Oswald", sans-serif'
-  ctx.letterSpacing = '0.12em'
-  ctx.fillText('SINDPOL-RJ  —  ELEIÇÕES 2026', W/2, 63)
+  // SINDPOL-RJ label
+  ctx.fillStyle = 'rgba(201,162,39,0.55)'
+  ctx.font = '500 26px "Oswald", sans-serif'
+  ctx.letterSpacing = '0.18em'
+  ctx.fillText('SINDPOL-RJ  —  ELEIÇÕES 2026', W / 2, 72)
   ctx.letterSpacing = '0'
 
   // Badge CHAPA 3
-  const bW = 280, bH = 58, bX = (W - bW) / 2, bY = 100
-  const bG = ctx.createLinearGradient(bX, 0, bX + bW, 0)
-  bG.addColorStop(0,   '#7A5C10')
-  bG.addColorStop(0.35,'#C9A227')
-  bG.addColorStop(0.5, '#F0C84A')
-  bG.addColorStop(0.65,'#C9A227')
-  bG.addColorStop(1,   '#7A5C10')
-  ctx.fillStyle = bG
+  const bW = 320, bH = 64, bX = (W - bW) / 2, bY = 90
+  ctx.fillStyle = goldGrad(ctx, bX, bW)
   ctx.fillRect(bX, bY, bW, bH)
-  ctx.fillStyle = '#0B1929'
-  ctx.font = 'bold 40px "Oswald", sans-serif'
-  ctx.letterSpacing = '0.20em'
+  ctx.fillStyle = '#07111F'
+  ctx.font = 'bold 46px "Oswald", sans-serif'
+  ctx.letterSpacing = '0.22em'
   ctx.textBaseline = 'middle'
-  ctx.fillText('CHAPA  3', W/2, bY + bH / 2 + 2)
+  ctx.fillText('CHAPA  3', W / 2, bY + bH / 2 + 2)
   ctx.textBaseline = 'alphabetic'
   ctx.letterSpacing = '0'
 
-  // GESTÃO & LUTA
-  const glG = ctx.createLinearGradient(0, 175, 0, 290)
-  glG.addColorStop(0,    '#FBE89A')
-  glG.addColorStop(0.45, '#C9A227')
+  // GESTÃO & LUTA — gradiente metálico
+  const glG = ctx.createLinearGradient(0, 172, 0, 310)
+  glG.addColorStop(0,    '#FDE99A')
+  glG.addColorStop(0.40, '#D4AF37')
   glG.addColorStop(1,    '#8B6914')
   ctx.fillStyle = glG
-  ctx.font = 'bold 100px "Oswald", sans-serif'
-  ctx.letterSpacing = '0.06em'
-  ctx.fillText('GESTÃO & LUTA', W/2, 278)
+  ctx.font = 'bold 118px "Oswald", sans-serif'
+  ctx.letterSpacing = '0.05em'
+  ctx.fillText('GESTÃO & LUTA', W / 2, 306)
   ctx.letterSpacing = '0'
 
-  // Linha divisória fina
-  const div1G = ctx.createLinearGradient(80, 0, W - 80, 0)
-  div1G.addColorStop(0,   'rgba(201,162,39,0)')
-  div1G.addColorStop(0.3, 'rgba(201,162,39,0.6)')
-  div1G.addColorStop(0.7, 'rgba(201,162,39,0.6)')
-  div1G.addColorStop(1,   'rgba(201,162,39,0)')
-  ctx.strokeStyle = div1G; ctx.lineWidth = 1.5
-  ctx.beginPath(); ctx.moveTo(80, 304); ctx.lineTo(W - 80, 304); ctx.stroke()
+  fadeLine(ctx, 340, 60, W - 60)
 
-  // ── Área da proposta ────────────────────────────────────────────────────────
-  const PAD = 72   // padding lateral
-  let cY = 340     // cursor vertical
+  // ── BLOCO PROPOSTA ──────────────────────────────────────────────────────────
+  const PAD = 68
+  let cY = 372
 
-  // Badge de tema
-  const temaLabel = TEMA_LABEL[proposta.tema] || proposta.tema
-  ctx.font = '500 22px "Oswald", sans-serif'
-  ctx.letterSpacing = '0.12em'
-  const temaW = ctx.measureText(temaLabel.toUpperCase()).width + 40
-  const temaX = PAD
-  ctx.fillStyle = 'rgba(201,162,39,0.12)'
-  ctx.strokeStyle = 'rgba(201,162,39,0.35)'
-  ctx.lineWidth = 1
-  ctx.beginPath(); ctx.rect(temaX, cY, temaW, 38); ctx.fill(); ctx.stroke()
-  ctx.fillStyle = '#C9A227'
-  ctx.textAlign = 'left'
-  ctx.textBaseline = 'middle'
-  ctx.fillText(temaLabel.toUpperCase(), temaX + 20, cY + 19)
+  // Número da proposta (grande, decorativo, alinhado à direita)
+  const numStr = String(proposta.id).padStart(2, '0')
+  ctx.font = 'bold 160px "Oswald", sans-serif'
+  ctx.fillStyle = 'rgba(212,175,55,0.08)'
+  ctx.textAlign = 'right'; ctx.textBaseline = 'top'
+  ctx.fillText(numStr, W - PAD, cY - 10)
   ctx.textBaseline = 'alphabetic'
-  ctx.letterSpacing = '0'
-  cY += 68
 
-  // Ícone + Título
-  ctx.font = `bold 70px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif`
-  ctx.textAlign = 'left'
+  // Badge "PROPOSTA Nº XX" — destaque dourado à direita
+  const numLabel = `PROPOSTA Nº ${numStr}`
+  ctx.font = 'bold 22px "Oswald", sans-serif'
+  ctx.letterSpacing = '0.14em'
+  const numBadgeW = ctx.measureText(numLabel).width + 36
+  const numBadgeX = W - PAD - numBadgeW
+  ctx.fillStyle = goldGrad(ctx, numBadgeX, numBadgeW)
+  ctx.fillRect(numBadgeX, cY, numBadgeW, 46)
+  ctx.fillStyle = '#07111F'
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+  ctx.fillText(numLabel, numBadgeX + numBadgeW / 2, cY + 23)
+  ctx.textBaseline = 'alphabetic'; ctx.letterSpacing = '0'
+
+  // Badge tema (à esquerda, na mesma altura)
+  const temaLabel = TEMA_LABEL[proposta.tema] || proposta.tema
+  ctx.font = '500 26px "Oswald", sans-serif'
+  ctx.letterSpacing = '0.14em'
+  const temaW = ctx.measureText(temaLabel.toUpperCase()).width + 48
+  ctx.fillStyle = 'rgba(201,162,39,0.13)'
+  ctx.strokeStyle = 'rgba(201,162,39,0.45)'
+  ctx.lineWidth = 1.5
+  ctx.beginPath(); ctx.rect(PAD, cY, temaW, 46); ctx.fill(); ctx.stroke()
+  ctx.fillStyle = '#D4AF37'
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle'
+  ctx.fillText(temaLabel.toUpperCase(), PAD + 24, cY + 23)
+  ctx.textBaseline = 'alphabetic'; ctx.letterSpacing = '0'
+  cY += 80
+
+  // Ícone emoji (grande)
+  ctx.font = '80px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif'
   ctx.fillStyle = '#FFFFFF'
-  ctx.fillText(proposta.icone, PAD, cY + 60)
+  ctx.textAlign = 'left'
+  ctx.fillText(proposta.icone, PAD, cY + 72)
 
-  ctx.font = 'bold 62px "Oswald", sans-serif'
+  // Título da proposta
+  ctx.font = 'bold 72px "Oswald", sans-serif'
   ctx.letterSpacing = '0.02em'
-  const titleMaxW = W - PAD - PAD - 90
-  const titleLines = wrapText(ctx, proposta.titulo.toUpperCase(), titleMaxW)
+  const titleLines = wrapText(ctx, proposta.titulo.toUpperCase(), W - PAD * 2 - 100)
   ctx.fillStyle = '#FFFFFF'
   let tY = cY
   for (const ln of titleLines) {
-    ctx.fillText(ln, PAD + 90, tY + 66)
-    tY += 72
+    ctx.fillText(ln, PAD + 100, tY + 76)
+    tY += 84
   }
-  cY = Math.max(cY + 80, tY) + 12
-
-  // Linha ouro sob título
-  ctx.strokeStyle = '#C9A227'; ctx.lineWidth = 3
-  ctx.beginPath(); ctx.moveTo(PAD, cY); ctx.lineTo(PAD + 100, cY); ctx.stroke()
-  cY += 36
-
-  // Descrição
-  ctx.font = '400 34px "Oswald", sans-serif'
-  ctx.fillStyle = 'rgba(255,220,140,0.90)'
-  ctx.letterSpacing = '0.01em'
-  cY = drawWrapped(ctx, proposta.descricao, PAD, cY, W - PAD * 2, 46)
+  cY = Math.max(cY + 90, tY) + 8
   ctx.letterSpacing = '0'
-  cY += 40
 
-  // Separador fino
-  ctx.strokeStyle = 'rgba(201,162,39,0.20)'; ctx.lineWidth = 1
-  ctx.beginPath(); ctx.moveTo(PAD, cY); ctx.lineTo(W - PAD, cY); ctx.stroke()
-  cY += 36
+  // Linha ouro sob título (3 segmentos decorativos)
+  ctx.strokeStyle = '#D4AF37'; ctx.lineWidth = 4
+  ctx.beginPath(); ctx.moveTo(PAD, cY); ctx.lineTo(PAD + 120, cY); ctx.stroke()
+  ctx.strokeStyle = 'rgba(212,175,55,0.35)'; ctx.lineWidth = 2
+  ctx.beginPath(); ctx.moveTo(PAD + 132, cY); ctx.lineTo(PAD + 180, cY); ctx.stroke()
+  cY += 44
 
-  // Pontos
+  // Descrição — texto âmbar quente
+  ctx.font = '400 38px "Oswald", sans-serif'
+  ctx.fillStyle = 'rgba(255,218,130,0.92)'
+  ctx.letterSpacing = '0.01em'
+  cY = drawWrapped(ctx, proposta.descricao, PAD, cY, W - PAD * 2, 52)
+  ctx.letterSpacing = '0'
+  cY += 44
+
+  // Separador antes dos pontos
+  fadeLine(ctx, cY, PAD, W - PAD)
+  cY += 44
+
+  // Pontos com marcador quadrado dourado
   for (const pt of proposta.pontos) {
-    // Checkmark dourado
-    ctx.fillStyle = '#C9A227'
-    ctx.font = 'bold 32px "Oswald", sans-serif'
-    ctx.fillText('✓', PAD, cY)
+    // Quadrado dourado 14×14
+    ctx.fillStyle = '#D4AF37'
+    ctx.fillRect(PAD, cY - 28, 14, 14)
 
-    ctx.fillStyle = '#E8ECF0'
-    ctx.font = '400 32px "Oswald", sans-serif'
+    ctx.fillStyle = '#DCE4EE'
+    ctx.font = '400 36px "Oswald", sans-serif'
     ctx.letterSpacing = '0.01em'
-    const ptLines = wrapText(ctx, pt, W - PAD - PAD - 50)
-    const ptX = PAD + 50
+    const ptLines = wrapText(ctx, pt, W - PAD * 2 - 36)
     for (let li = 0; li < ptLines.length; li++) {
-      ctx.fillText(ptLines[li], ptX, cY + li * 40)
+      ctx.fillText(ptLines[li], PAD + 32, cY + li * 46 - (li > 0 ? 28 - 46 : 0))
     }
     ctx.letterSpacing = '0'
-    cY += ptLines.length * 40 + 20
+    cY += ptLines.length * 46 + 18
   }
 
-  // ── Rodapé: candidatos + site ───────────────────────────────────────────────
-  const footerY = H - 320
+  // ── BLOCO CANDIDATOS (faixa sólida) ────────────────────────────────────────
+  const candY = H - 430  // posição fixa para a faixa de candidatos
 
-  // Linha separadora antes do rodapé
-  const spG = ctx.createLinearGradient(80, 0, W - 80, 0)
-  spG.addColorStop(0,   'rgba(201,162,39,0)')
-  spG.addColorStop(0.3, 'rgba(201,162,39,0.5)')
-  spG.addColorStop(0.7, 'rgba(201,162,39,0.5)')
-  spG.addColorStop(1,   'rgba(201,162,39,0)')
-  ctx.strokeStyle = spG; ctx.lineWidth = 1
-  ctx.beginPath(); ctx.moveTo(80, footerY); ctx.lineTo(W - 80, footerY); ctx.stroke()
+  // Fundo da faixa candidatos
+  ctx.fillStyle = 'rgba(0,0,0,0.40)'
+  ctx.fillRect(0, candY, W, 220)
 
-  // Candidatos: esquerda (Presidente) e direita (Vice)
-  ctx.textAlign = 'center'
+  // Linha ouro topo da faixa
+  ctx.fillStyle = goldGrad(ctx, 0, W)
+  ctx.fillRect(0, candY, W, 4)
 
-  // Coluna esquerda — Presidente
-  const col1X = W / 4
-  ctx.fillStyle = '#FFFFFF'
-  ctx.font = 'bold 38px "Oswald", sans-serif'
-  ctx.letterSpacing = '0.04em'
-  ctx.fillText('LUIZ CLÁUDIO', col1X, footerY + 64)
-  ctx.fillStyle = '#C9A227'
-  ctx.font = '500 18px "Oswald", sans-serif'
-  ctx.letterSpacing = '0.16em'
-  ctx.fillText('PRESIDENTE', col1X, footerY + 90)
-  ctx.letterSpacing = '0'
-
-  // Divisor vertical entre candidatos
-  ctx.strokeStyle = 'rgba(201,162,39,0.30)'; ctx.lineWidth = 1
-  ctx.beginPath(); ctx.moveTo(W/2, footerY + 16); ctx.lineTo(W/2, footerY + 106); ctx.stroke()
-
-  // Coluna direita — Vice-Presidente
-  const col2X = (W * 3) / 4
-  ctx.fillStyle = '#FFFFFF'
-  ctx.font = 'bold 38px "Oswald", sans-serif'
-  ctx.letterSpacing = '0.04em'
-  ctx.fillText('MÁRCIA BEZERRA', col2X, footerY + 64)
-  ctx.fillStyle = '#C9A227'
-  ctx.font = '500 18px "Oswald", sans-serif'
-  ctx.letterSpacing = '0.16em'
-  ctx.fillText('VICE-PRESIDENTE', col2X, footerY + 90)
-  ctx.letterSpacing = '0'
-
-  // Linha abaixo dos candidatos
-  ctx.strokeStyle = spG; ctx.lineWidth = 1
-  ctx.beginPath(); ctx.moveTo(80, footerY + 116); ctx.lineTo(W - 80, footerY + 116); ctx.stroke()
-
-  // Data da eleição
-  ctx.fillStyle = 'rgba(201,162,39,0.70)'
+  // Rótulo da faixa
+  ctx.fillStyle = 'rgba(212,175,55,0.65)'
   ctx.font = '500 22px "Oswald", sans-serif'
-  ctx.letterSpacing = '0.12em'
-  ctx.fillText('09 DE MAIO DE 2026  ·  9H30', W/2, footerY + 164)
+  ctx.letterSpacing = '0.20em'
+  ctx.textAlign = 'center'
+  ctx.fillText('NOSSA CHAPA', W / 2, candY + 36)
   ctx.letterSpacing = '0'
 
-  // URL do site
-  ctx.fillStyle = 'rgba(201,162,39,0.60)'
-  ctx.font = '500 20px "Oswald", sans-serif'
-  ctx.letterSpacing = '0.04em'
-  ctx.fillText('Acesse o nosso site e saiba mais:', W/2, footerY + 188)
-  ctx.fillStyle = '#C9A227'
-  ctx.font = 'bold 24px "Oswald", sans-serif'
-  ctx.letterSpacing = '0.08em'
-  ctx.fillText('bit.ly/chapa3_sindpol', W/2, footerY + 216)
+  // Divisor vertical central
+  ctx.strokeStyle = 'rgba(212,175,55,0.35)'; ctx.lineWidth = 1.5
+  ctx.beginPath(); ctx.moveTo(W / 2, candY + 50); ctx.lineTo(W / 2, candY + 200); ctx.stroke()
+
+  // Presidente — coluna esquerda
+  const c1X = W / 4
+  ctx.fillStyle = '#FFFFFF'
+  ctx.font = 'bold 52px "Oswald", sans-serif'
+  ctx.letterSpacing = '0.03em'
+  ctx.fillText('LUIZ CLÁUDIO', c1X, candY + 114)
+  ctx.fillStyle = '#D4AF37'
+  ctx.font = '600 26px "Oswald", sans-serif'
+  ctx.letterSpacing = '0.18em'
+  ctx.fillText('PRESIDENTE', c1X, candY + 148)
   ctx.letterSpacing = '0'
 
-  // Botão CTA
-  const ctaW = 640, ctaH = 66, ctaX2 = (W - ctaW) / 2, ctaY2 = footerY + 240
-  const ctaG2 = ctx.createLinearGradient(ctaX2, 0, ctaX2 + ctaW, 0)
-  ctaG2.addColorStop(0,   '#7A5C10')
-  ctaG2.addColorStop(0.3, '#C9A227')
-  ctaG2.addColorStop(0.5, '#F0C84A')
-  ctaG2.addColorStop(0.7, '#C9A227')
-  ctaG2.addColorStop(1,   '#7A5C10')
-  ctx.fillStyle = ctaG2
-  ctx.fillRect(ctaX2, ctaY2, ctaW, ctaH)
-  ctx.fillStyle = '#0B1929'
-  ctx.font = 'bold 26px "Oswald", sans-serif'
+  // Vice-Presidente — coluna direita
+  const c2X = (W * 3) / 4
+  ctx.fillStyle = '#FFFFFF'
+  ctx.font = 'bold 52px "Oswald", sans-serif'
+  ctx.letterSpacing = '0.03em'
+  ctx.fillText('MÁRCIA BEZERRA', c2X, candY + 114)
+  ctx.fillStyle = '#D4AF37'
+  ctx.font = '600 26px "Oswald", sans-serif'
+  ctx.letterSpacing = '0.18em'
+  ctx.fillText('VICE-PRESIDENTE', c2X, candY + 148)
+  ctx.letterSpacing = '0'
+
+  // Linha ouro base da faixa
+  ctx.fillStyle = goldGrad(ctx, 0, W)
+  ctx.fillRect(0, candY + 216, W, 3)
+
+  // ── BLOCO RODAPÉ: data + URL + CTA ─────────────────────────────────────────
+  const footY = candY + 228
+
+  // Data
+  ctx.fillStyle = 'rgba(212,175,55,0.75)'
+  ctx.font = '500 26px "Oswald", sans-serif'
   ctx.letterSpacing = '0.14em'
+  ctx.fillText('09 DE MAIO DE 2026  ·  9H30', W / 2, footY + 40)
+  ctx.letterSpacing = '0'
+
+  // URL
+  ctx.fillStyle = 'rgba(212,175,55,0.55)'
+  ctx.font = '400 24px "Oswald", sans-serif'
+  ctx.letterSpacing = '0.05em'
+  ctx.fillText('Acesse o nosso site e saiba mais:', W / 2, footY + 74)
+  ctx.fillStyle = '#D4AF37'
+  ctx.font = 'bold 30px "Oswald", sans-serif'
+  ctx.letterSpacing = '0.10em'
+  ctx.fillText('bit.ly/chapa3_sindpol', W / 2, footY + 110)
+  ctx.letterSpacing = '0'
+
+  // Botão CTA dourado
+  const ctaW = 700, ctaH = 72, ctaX = (W - ctaW) / 2, ctaY = footY + 126
+  ctx.fillStyle = goldGrad(ctx, ctaX, ctaW)
+  ctx.fillRect(ctaX, ctaY, ctaW, ctaH)
+  ctx.fillStyle = '#07111F'
+  ctx.font = 'bold 32px "Oswald", sans-serif'
+  ctx.letterSpacing = '0.16em'
   ctx.textBaseline = 'middle'
-  ctx.fillText('VOTE GESTÃO E LUTA!', W/2, ctaY2 + ctaH / 2 + 1)
+  ctx.fillText('VOTE GESTÃO E LUTA!', W / 2, ctaY + ctaH / 2 + 1)
   ctx.textBaseline = 'alphabetic'
   ctx.letterSpacing = '0'
 
