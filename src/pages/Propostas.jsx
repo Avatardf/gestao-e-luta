@@ -276,7 +276,8 @@ export default function PropostasPage() {
     Object.fromEntries(propostas.map(p => [p.id, { media: 0, total: 0, loading: true }]))
   )
   const [submitting, setSubmitting] = useState({}) // { [proposalId]: bool }
-  const [pdfLoading, setPdfLoading] = useState(false)
+  const [pdfLoading,  setPdfLoading]  = useState(false)
+  const [pdfSharing,  setPdfSharing]  = useState(false)
   const [fonteLevel, setFonteLevel] = useState(0) // 0 = normal, 1 = médio, 2 = grande
   const visitor = useVisitor()
   const { dark, toggle } = useTheme()
@@ -291,6 +292,34 @@ export default function PropostasPage() {
       alert('Não foi possível gerar o PDF. Tente novamente.')
     } finally {
       setPdfLoading(false)
+    }
+  }
+
+  async function handleSharePDF() {
+    if (pdfSharing) return
+    setPdfSharing(true)
+    try {
+      const file = await generateChapaPDF({ returnBlob: true })
+      const url  = 'https://gestao-e-luta.vercel.app/'
+      const text = 'Conheça as propostas da Chapa 3 — GESTÃO E LUTA!'
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ title: 'Chapa 3 — Gestão e Luta', text, url, files: [file] })
+      } else if (navigator.share) {
+        await navigator.share({ title: 'Chapa 3 — Gestão e Luta', text, url })
+      } else {
+        const a = document.createElement('a')
+        a.href = URL.createObjectURL(file)
+        a.download = file.name
+        a.click()
+        URL.revokeObjectURL(a.href)
+      }
+    } catch (e) {
+      if (e?.name !== 'AbortError') {
+        console.error('Erro ao compartilhar PDF:', e)
+        alert('Não foi possível compartilhar. Tente novamente.')
+      }
+    } finally {
+      setPdfSharing(false)
     }
   }
 
@@ -418,22 +447,27 @@ export default function PropostasPage() {
             </div>
           )}
 
-          <div className="mt-8">
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <button
               onClick={handleDownloadPDF}
-              disabled={pdfLoading}
+              disabled={pdfLoading || pdfSharing}
               className="inline-flex items-center gap-2 bg-gold-500 hover:bg-gold-400 text-navy-950 font-heading text-xs tracking-widest uppercase px-6 py-3 transition-all disabled:opacity-60 disabled:cursor-wait shadow-lg shadow-gold-500/20"
             >
               {pdfLoading ? (
-                <>
-                  <Loader2 size={14} className="animate-spin" />
-                  Gerando PDF…
-                </>
+                <><Loader2 size={14} className="animate-spin" /> Gerando PDF…</>
               ) : (
-                <>
-                  <Download size={14} />
-                  Baixar PDF da Chapa
-                </>
+                <><Download size={14} /> Baixar PDF da Chapa</>
+              )}
+            </button>
+            <button
+              onClick={handleSharePDF}
+              disabled={pdfLoading || pdfSharing}
+              className="inline-flex items-center gap-2 border border-gold-500/60 text-gold-400 hover:bg-gold-500/10 font-heading text-xs tracking-widest uppercase px-6 py-3 transition-all disabled:opacity-60 disabled:cursor-wait"
+            >
+              {pdfSharing ? (
+                <><Loader2 size={14} className="animate-spin" /> Gerando PDF…</>
+              ) : (
+                <><Share2 size={14} /> Compartilhar PDF</>
               )}
             </button>
           </div>

@@ -6,6 +6,7 @@ import { generatePropostaShareImage } from '../utils/generatePropostaImage'
 import { generateDiretorCard }        from '../utils/generateDiretorCard'
 import { generateVoteCard }           from '../utils/generateVoteCard'
 import { generateContagemCard }       from '../utils/generateContagemCard'
+import { generateChapaPDF }           from '../utils/generatePDF'
 import { propostas }                  from '../data/propostas'
 import { supabase }                   from '../lib/supabase'
 
@@ -51,7 +52,7 @@ function DiretorAvatar({ dir }) {
 }
 
 // ─── KitCard ─────────────────────────────────────────────────────────────────
-function KitCard({ title, subtitle, format, emoji, avatarEl, onDownload, onShare, loading }) {
+function KitCard({ title, subtitle, format, emoji, avatarEl, onDownload, onShare, loading, downloadLabel = 'Baixar PNG', shareLabel = 'Compartilhar' }) {
   return (
     <div className="bg-navy-900 border border-navy-700 hover:border-gold-500/40 transition-all duration-300 p-6 flex flex-col gap-4">
       {/* Topo: emoji/avatar + badge de formato */}
@@ -85,7 +86,7 @@ function KitCard({ title, subtitle, format, emoji, avatarEl, onDownload, onShare
                        hover:bg-gold-500 hover:text-navy-950 transition-all duration-200"
           >
             <Download size={13} />
-            Baixar PNG
+            {downloadLabel}
           </button>
           <button
             onClick={onShare}
@@ -94,7 +95,7 @@ function KitCard({ title, subtitle, format, emoji, avatarEl, onDownload, onShare
                        hover:bg-gold-400 transition-all duration-200"
           >
             <Share2 size={13} />
-            Compartilhar
+            {shareLabel}
           </button>
         </div>
       )}
@@ -280,9 +281,29 @@ export default function KitPage() {
           <SectionHeader
             label="Plataforma"
             title="Nossas Propostas"
-            subtitle="Compartilhe cada proposta individualmente com um card 9:16."
+            subtitle="Compartilhe o PDF completo ou cada proposta individualmente com um card 9:16."
           />
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-8">
+
+          {/* PDF da Chapa */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-8 mb-6">
+            <KitCard
+              title="PDF Completo da Chapa"
+              subtitle="Documento com as 12 propostas e a diretoria da Chapa 3. Ideal para enviar via WhatsApp ou e-mail."
+              format="PDF"
+              emoji="📄"
+              downloadLabel="Baixar PDF"
+              shareLabel="Compartilhar"
+              loading={!!generating['pdf-propostas']}
+              onDownload={() => handleDownload('pdf-propostas', () => generateChapaPDF({ returnBlob: true }))}
+              onShare={() => handleShare(
+                'pdf-propostas',
+                () => generateChapaPDF({ returnBlob: true }),
+                'Conheça as propostas da Chapa 3 — GESTÃO E LUTA!'
+              )}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {propostas.map(p => (
               <KitCard
                 key={p.id}

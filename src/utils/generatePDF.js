@@ -3,7 +3,7 @@ import jsPDF from 'jspdf'
 import { supabase } from '../lib/supabase'
 import { diretores as diretoresFallback } from '../data/diretores'
 
-const SITE_URL = 'https://bit.ly/chapa3_sindpol'
+const SITE_URL = 'https://gestao-e-luta.vercel.app/'
 
 const cargoMap = {
   1:'Presidente', 2:'Vice-Presidente', 3:'Secretário', 4:'Tesoureira',
@@ -61,11 +61,13 @@ function footerHTML(page) {
         ★ VOTE CHAPA 3
       </div>
       <div style="flex:1;text-align:center;line-height:1.5;">
-        <div style="font-family:Inter,sans-serif;font-size:11px;color:#94a3b8;">
+        <div style="font-family:Inter,sans-serif;font-size:11px;color:#94a3b8;margin-bottom:6px;">
           Acesse o nosso site e conheça os detalhes das propostas da Chapa 3 — Gestão e Luta
         </div>
-        <div style="font-family:Oswald,sans-serif;font-size:14px;font-weight:600;color:#d4af37;letter-spacing:1px;margin-top:2px;">
-          bit.ly/chapa3_sindpol
+        <div style="display:inline-block;padding:6px 18px;background:linear-gradient(135deg,#f4d06f,#d4af37 55%,#a8821c);
+                    color:#0f172a;font-family:Oswald,sans-serif;font-size:12px;font-weight:700;
+                    letter-spacing:2px;text-transform:uppercase;border-radius:2px;">
+          CLIQUE AQUI PARA ACESSAR
         </div>
       </div>
       <div style="text-align:right;font-family:Oswald,sans-serif;flex-shrink:0;">
@@ -215,7 +217,7 @@ function buildPage2() {
   </div>`
 }
 
-export async function generateChapaPDF() {
+export async function generateChapaPDF({ returnBlob = false } = {}) {
   let diretores
   try {
     const { data } = await supabase.from('directors').select('*').order('id')
@@ -252,16 +254,19 @@ export async function generateChapaPDF() {
       if (id > 1) pdf.addPage()
       pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297)
 
-      // Link clicável sobre o URL no rodapé (bit.ly/chapa3_sindpol)
-      // Footer bottom ~13px from bottom → y = (1123-13)px * pxToMm ≈ 293mm
-      // URL text centered, approx 160px wide, centered at 397px
-      const urlW = 160 * pxToMm   // ~42mm
-      const urlX = (397 - 80) * pxToMm  // ~83mm
-      const urlY = (1123 - 46) * pxToMm  // ~284mm
-      const urlH = 10 * pxToMm   // ~2.6mm
-      pdf.link(urlX, urlY + 8, urlW, urlH + 6, { url: SITE_URL })
+      // Link clicável sobre o botão "CLIQUE AQUI PARA ACESSAR" no rodapé
+      // Botão centralizado em x=397px, largura ~170px, altura ~26px
+      // Footer inicia em y=(1123-46)px, botão ~8px abaixo do texto de 11px (~18px) + 6px margin
+      const btnW = 170 * pxToMm   // ~45mm
+      const btnX = (397 - 85) * pxToMm  // ~82mm
+      const btnY = (1123 - 38) * pxToMm // ~284mm
+      const btnH = 26 * pxToMm    // ~7mm
+      pdf.link(btnX, btnY, btnW, btnH, { url: SITE_URL })
     }
 
+    if (returnBlob) {
+      return new File([pdf.output('blob')], 'Chapa-3-Gestao-e-Luta.pdf', { type: 'application/pdf' })
+    }
     pdf.save('Chapa-3-Gestao-e-Luta.pdf')
   } finally {
     document.body.removeChild(wrapper)
