@@ -1,19 +1,22 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 
 export function useInView(options = {}) {
-  const ref = useRef(null)
   const [inView, setInView] = useState(false)
+  const observerRef = useRef(null)
 
-  useEffect(() => {
-    const el = ref.current
+  const ref = useCallback((el) => {
+    if (observerRef.current) {
+      observerRef.current.disconnect()
+      observerRef.current = null
+    }
     if (!el) return
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) { setInView(true); observer.disconnect() } },
       { threshold: 0.15, ...options }
     )
     observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
+    observerRef.current = observer
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return [ref, inView]
 }
