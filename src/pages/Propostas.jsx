@@ -301,8 +301,6 @@ export default function PropostasPage() {
       const text = 'Conheça as propostas da Chapa 3 — GESTÃO E LUTA!'
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({ title: 'Chapa 3 — Gestão e Luta', text, url, files: [file] })
-      } else if (navigator.share) {
-        await navigator.share({ title: 'Chapa 3 — Gestão e Luta', text, url })
       } else {
         const a = document.createElement('a')
         a.href = URL.createObjectURL(file)

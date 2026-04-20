@@ -145,8 +145,6 @@ export default function KitPage() {
       const url  = 'https://gestao-e-luta.vercel.app/'
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({ title: 'GESTÃO E LUTA — Chapa 3', text: shareText, url, files: [file] })
-      } else if (navigator.share) {
-        await navigator.share({ title: 'GESTÃO E LUTA — Chapa 3', text: shareText, url })
       } else {
         const a    = document.createElement('a')
         a.href     = URL.createObjectURL(file)
