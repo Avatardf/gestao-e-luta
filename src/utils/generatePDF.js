@@ -220,12 +220,12 @@ function buildPage2() {
 
 function buildPage3() {
   const acaoCard = (a) => `
-    <div style="margin-bottom:4px;padding:5px 10px 5px 14px;background:#fff;
+    <div style="margin-bottom:4px;padding:5px 10px 5px 12px;background:#fff;
                 border-top:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;
                 border-right:1px solid #e2e8f0;border-left:3px solid #d4af37;">
       <div style="font-family:Oswald,sans-serif;font-weight:700;font-size:11.5px;
                   color:#0f172a;text-transform:uppercase;line-height:1.3;">
-        <span style="color:#d4af37;margin-right:6px;">${String(a.id).padStart(2,'0')}.</span>${a.titulo}
+        <span style="color:#d4af37;margin-right:5px;">${String(a.id).padStart(2,'0')}.</span>${a.titulo}
       </div>
       <div style="font-size:10.5px;color:#475569;line-height:1.4;margin-top:1px;">${a.descricao}</div>
     </div>`
@@ -235,48 +235,36 @@ function buildPage3() {
 
   return `
   <div id="pdf-p3" style="width:794px;height:1123px;background:#f1f5f9;
-       color:#0f172a;overflow:hidden;font-family:Inter,sans-serif;">
+       color:#0f172a;overflow:hidden;font-family:Inter,sans-serif;display:flex;flex-direction:column;">
 
-    <!-- HEADER -->
-    <div style="background:#0f172a;padding:10px 32px;border-bottom:3px solid #d4af37;">
-      <table style="width:100%;border-collapse:collapse;"><tr>
-        <td style="vertical-align:middle;">
-          <span style="font-family:Oswald,sans-serif;font-weight:700;font-size:16px;
-                       background:#d4af37;color:#0f172a;padding:2px 8px;margin-right:10px;">GL</span>
-          <span style="font-family:Oswald,sans-serif;font-weight:600;letter-spacing:3px;
-                       font-size:13px;color:#fff;">GESTAO &amp; LUTA — CHAPA 3</span>
-        </td>
-        <td style="text-align:right;vertical-align:middle;">
-          <span style="font-family:Oswald,sans-serif;font-size:11px;letter-spacing:2px;color:#d4af37;">ACOES IMEDIATAS</span>
-        </td>
-      </tr></table>
+    <!-- HEADER (igual páginas 1 e 2) -->
+    <div style="background:linear-gradient(135deg,#0b1a2e 0%,#0f172a 50%,#1e293b 100%);padding:12px 36px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #d4af37;flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:36px;height:36px;background:linear-gradient(135deg,#f4d06f,#d4af37 55%,#a8821c);display:flex;align-items:center;justify-content:center;font-family:Oswald,sans-serif;font-weight:700;color:#0f172a;font-size:13px;">GL</div>
+        <div style="font-family:Oswald,sans-serif;font-weight:600;letter-spacing:3px;font-size:14px;color:#fff;">GESTÃO <span style="color:#d4af37;">&amp;</span> LUTA</div>
+      </div>
+      <div style="font-family:Oswald,sans-serif;font-weight:700;font-size:20px;letter-spacing:3px;color:#d4af37;">CHAPA 3</div>
     </div>
 
-    <!-- INTRO -->
-    <div style="padding:8px 32px 4px;border-bottom:1px solid #cbd5e1;background:#e2e8f0;">
-      <span style="font-family:Oswald,sans-serif;font-weight:700;font-size:18px;
-                   letter-spacing:3px;color:#0f172a;text-transform:uppercase;">Acoes Imediatas</span>
-      <span style="font-size:11px;color:#64748b;margin-left:14px;font-style:italic;">
+    <!-- TITLE -->
+    <div style="text-align:center;padding:10px 36px 6px;flex-shrink:0;">
+      <h2 style="font-family:Oswald,sans-serif;font-weight:700;font-size:22px;letter-spacing:4px;color:#0f172a;text-transform:uppercase;display:inline-block;margin:0;">Acoes Imediatas</h2>
+      <p style="font-size:11px;color:#64748b;margin:4px 0 0;font-style:italic;">
         Quem ja fez e sabe o caminho nao precisa prometer ilusoes.
-      </span>
+      </p>
     </div>
 
-    <!-- DUAS COLUNAS via table -->
-    <table style="width:100%;border-collapse:collapse;padding:6px 20px;">
-      <tr style="vertical-align:top;">
-        <td style="width:50%;padding:6px 6px 0 20px;">
-          ${col1.map(acaoCard).join('')}
-        </td>
-        <td style="width:50%;padding:6px 20px 0 6px;">
-          ${col2.map(acaoCard).join('')}
-        </td>
-      </tr>
-    </table>
-
-    <!-- FOOTER -->
-    <div style="position:absolute;bottom:0;left:0;right:0;">
-      ${footerHTML(3)}
+    <!-- COLUNAS via table (mais compativel com html2canvas) -->
+    <div style="flex:1;padding:0 16px;">
+      <table style="width:100%;border-collapse:collapse;border-spacing:0;">
+        <tr style="vertical-align:top;">
+          <td style="width:50%;padding-right:8px;">${col1.map(acaoCard).join('')}</td>
+          <td style="width:50%;padding-left:8px;">${col2.map(acaoCard).join('')}</td>
+        </tr>
+      </table>
     </div>
+
+    ${footerHTML(3)}
   </div>`
 }
 
@@ -328,7 +316,9 @@ export async function generateChapaPDF({ returnBlob = false } = {}) {
     }
 
     if (returnBlob) {
-      return new File([pdf.output('blob')], 'Chapa-3-Gestao-e-Luta.pdf', { type: 'application/pdf' })
+      const buf  = pdf.output('arraybuffer')
+      const blob = new Blob([buf], { type: 'application/pdf' })
+      return new File([blob], 'Chapa-3-Gestao-e-Luta.pdf', { type: 'application/pdf' })
     }
     pdf.save('Chapa-3-Gestao-e-Luta.pdf')
   } finally {
