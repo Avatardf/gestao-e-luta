@@ -416,7 +416,7 @@ export default function PropostasPage() {
             <div className="h-px bg-gold-500/40 flex-1 max-w-24" />
           </div>
           <p className="text-gray-400 max-w-xl mx-auto text-sm leading-relaxed">
-            Não são apenas promessas. São compromissos com prazo, responsável e método claro de execução.
+            Não são apenas promessas. São compromissos com prazo, responsabilidade e método claro de execução.
             <br />
             <span className="text-gold-400">Avalie de 1 a 5 quais propostas são mais importantes para você.</span>
           </p>
