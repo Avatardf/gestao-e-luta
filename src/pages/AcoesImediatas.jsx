@@ -409,7 +409,7 @@ export default function AcoesImediatasPage() {
           <p className="text-gray-400 max-w-2xl mx-auto text-sm leading-relaxed">
             <span className="text-gold-400 font-medium">Quem já fez e sabe o caminho não precisa prometer ilusões.</span>
             <br />
-            Estas são as ações que executaremos nos primeiros dias de gestão — não promessas, compromissos com prazo e responsável.
+            Estas são as ações que executaremos nos primeiros dias de gestão — não promessas, mas compromissos com responsabilidade.
             <br className="hidden sm:block" />
             <span className="text-gold-400">Avalie de 1 a 5 quais ações são mais urgentes para você.</span>
           </p>
