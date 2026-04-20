@@ -220,22 +220,19 @@ function buildPage2() {
 
 function buildPage3() {
   const acaoCard = (a) => `
-    <div style="display:flex;align-items:stretch;background:#fff;border:1px solid #cbd5e1;
-                border-radius:6px;overflow:hidden;box-shadow:0 2px 8px rgba(15,23,42,0.07);margin-bottom:6px;">
-      <div style="width:52px;flex-shrink:0;background:linear-gradient(180deg,#0f172a 0%,#1e293b 100%);
-                  color:#d4af37;font-family:Oswald,sans-serif;font-weight:700;font-size:22px;
-                  display:flex;align-items:center;justify-content:center;position:relative;">
+    <div style="display:flex;align-items:flex-start;background:#fff;border:1px solid #cbd5e1;
+                overflow:hidden;margin-bottom:5px;">
+      <div style="width:46px;min-width:46px;background:#0f172a;
+                  color:#d4af37;font-family:Oswald,sans-serif;font-weight:700;font-size:20px;
+                  text-align:center;padding:8px 0;align-self:stretch;display:flex;align-items:center;justify-content:center;">
         ${a.id}
-        <div style="position:absolute;right:-9px;top:0;bottom:0;width:9px;
-                    background:linear-gradient(180deg,#0f172a 0%,#1e293b 100%);
-                    clip-path:polygon(0 0,100% 50%,0 100%);"></div>
       </div>
-      <div style="flex:1;padding:7px 12px 7px 18px;">
-        <div style="font-family:Oswald,sans-serif;font-weight:600;font-size:13.5px;letter-spacing:0.4px;
-                    color:#0f172a;line-height:1.2;text-transform:uppercase;margin-bottom:3px;">
-          ${a.icone} ${a.titulo}
+      <div style="padding:6px 10px 6px 12px;">
+        <div style="font-family:Oswald,sans-serif;font-weight:600;font-size:12.5px;letter-spacing:0.3px;
+                    color:#0f172a;line-height:1.25;text-transform:uppercase;margin-bottom:2px;">
+          ${a.titulo}
         </div>
-        <div style="font-size:11.5px;color:#475569;font-weight:500;line-height:1.4;">${a.descricao}</div>
+        <div style="font-size:11px;color:#475569;font-weight:500;line-height:1.4;">${a.descricao}</div>
       </div>
     </div>`
 
@@ -244,29 +241,29 @@ function buildPage3() {
 
   return `
   <div id="pdf-p3" style="width:794px;height:1123px;background:linear-gradient(180deg,#f1f5f9 0%,#e2e8f0 100%);
-       color:#0f172a;position:relative;overflow:hidden;display:flex;flex-direction:column;font-family:Inter,sans-serif;">
+       color:#0f172a;overflow:hidden;display:flex;flex-direction:column;font-family:Inter,sans-serif;">
 
     <!-- HEADER -->
-    <div style="background:linear-gradient(135deg,#0b1a2e 0%,#0f172a 50%,#1e293b 100%);padding:12px 36px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #d4af37;flex-shrink:0;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div style="width:36px;height:36px;background:linear-gradient(135deg,#f4d06f,#d4af37 55%,#a8821c);display:flex;align-items:center;justify-content:center;font-family:Oswald,sans-serif;font-weight:700;color:#0f172a;font-size:13px;">GL</div>
-        <div style="font-family:Oswald,sans-serif;font-weight:600;letter-spacing:3px;font-size:14px;color:#fff;">GESTÃO <span style="color:#d4af37;">&amp;</span> LUTA</div>
+    <div style="background:#0f172a;padding:12px 36px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #d4af37;flex-shrink:0;">
+      <div style="display:flex;align-items:center;">
+        <div style="width:36px;height:36px;background:#d4af37;display:flex;align-items:center;justify-content:center;font-family:Oswald,sans-serif;font-weight:700;color:#0f172a;font-size:13px;margin-right:10px;">GL</div>
+        <div style="font-family:Oswald,sans-serif;font-weight:600;letter-spacing:3px;font-size:14px;color:#fff;">GESTÃO &amp; LUTA</div>
       </div>
       <div style="font-family:Oswald,sans-serif;font-weight:700;font-size:20px;letter-spacing:3px;color:#d4af37;">CHAPA 3</div>
     </div>
 
     <!-- TITLE + INTRO -->
-    <div style="text-align:center;padding:12px 36px 6px;flex-shrink:0;">
-      <h2 style="font-family:Oswald,sans-serif;font-weight:700;font-size:24px;letter-spacing:4px;color:#0f172a;text-transform:uppercase;display:inline-block;">Ações Imediatas</h2>
-      <p style="font-size:12px;color:#64748b;margin:6px 0 0;font-style:italic;line-height:1.5;">
+    <div style="text-align:center;padding:10px 36px 4px;flex-shrink:0;">
+      <div style="font-family:Oswald,sans-serif;font-weight:700;font-size:22px;letter-spacing:4px;color:#0f172a;text-transform:uppercase;">Ações Imediatas</div>
+      <div style="font-size:11px;color:#64748b;margin-top:4px;font-style:italic;">
         Quem já fez e sabe o caminho não precisa prometer ilusões. Estas são as ações que executaremos nos primeiros dias de gestão.
-      </p>
+      </div>
     </div>
 
-    <!-- GRID -->
-    <div style="flex:1;padding:4px 24px 0;display:grid;grid-template-columns:1fr 1fr;gap:0 12px;min-height:0;">
-      <div>${leftItems.map(acaoCard).join('')}</div>
-      <div>${rightItems.map(acaoCard).join('')}</div>
+    <!-- DUAS COLUNAS via flex -->
+    <div style="flex:1;padding:4px 20px 0;display:flex;gap:12px;overflow:hidden;">
+      <div style="flex:1;overflow:hidden;">${leftItems.map(acaoCard).join('')}</div>
+      <div style="flex:1;overflow:hidden;">${rightItems.map(acaoCard).join('')}</div>
     </div>
 
     ${footerHTML(3)}
