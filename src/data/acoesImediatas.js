@@ -11,7 +11,7 @@ export const acoesImediatas = [
     icone: '⚡',
     titulo: 'Tutela de Urgência nas Promoções',
     descricao:
-      'Buscar, na ACP das promoções, tutela de urgência fundamentada na promessa judicial registrada em ata/gravação de audiência, pleiteando o cumprimento antecipado da obrigação de fazer com base no art. 300 do CPC.',
+      'Buscar, na Ação Civil Pública (ACP) das promoções, tutela de urgência fundamentada na promessa judicial registrada em ata/gravação de audiência, pleiteando o cumprimento antecipado da obrigação de fazer com base no art. 300 do CPC.',
   },
   {
     id: 3,
@@ -102,6 +102,6 @@ export const acoesImediatas = [
     icone: '🤚',
     titulo: 'Compromisso com a Verdade',
     descricao:
-      'NÃO MENTIR NA CAMPANHA COM PROMESSAS SABIDAMENTE DESCABIDAS COM OBJETIVO ELEITOREIRO. Quem já fez e sabe o caminho não precisa prometer ilusões.',
+      'Não mentir na campanha com promessas sabidamente descabidas com objetivo eleitoreiro.',
   },
 ]
