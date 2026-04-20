@@ -290,7 +290,7 @@ export async function generateChapaPDF({ returnBlob = false } = {}) {
     if (document.fonts?.ready) await document.fonts.ready
 
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
-    const scale = 2
+    const scale = returnBlob ? 1.5 : 2
     // Escala px → mm: 794px = 210mm
     const pxToMm = 210 / 794
 
@@ -301,7 +301,7 @@ export async function generateChapaPDF({ returnBlob = false } = {}) {
         logging: false, width: 794, height: 1123,
         windowWidth: 794, windowHeight: 1123,
       })
-      const imgData = canvas.toDataURL('image/jpeg', 0.95)
+      const imgData = canvas.toDataURL('image/jpeg', returnBlob ? 0.80 : 0.95)
       if (id > 1) pdf.addPage()
       pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297)
 

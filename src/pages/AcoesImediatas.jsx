@@ -353,22 +353,22 @@ export default function AcoesImediatasPage() {
     if (pdfSharing) return
     setPdfSharing(true)
     try {
-      const file = await generateChapaPDF({ returnBlob: true })
-      const url  = 'https://gestao-e-luta.vercel.app/'
-      const text = 'Conheça as propostas e as ações imediatas da Chapa 3 — GESTÃO E LUTA!'
-      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+      // Testa se o dispositivo suporta share com arquivo antes de gerar o blob
+      const testFile = new File([''], 'test.pdf', { type: 'application/pdf' })
+      const canShareFile = navigator.share && navigator.canShare?.({ files: [testFile] })
+
+      if (canShareFile) {
+        const file = await generateChapaPDF({ returnBlob: true })
+        const url  = 'https://gestao-e-luta.vercel.app/'
+        const text = 'Conheça as propostas e as ações imediatas da Chapa 3 — GESTÃO E LUTA!'
         await navigator.share({ title: 'Chapa 3 — Gestão e Luta', text, url, files: [file] })
       } else {
-        const a = document.createElement('a')
-        a.href = URL.createObjectURL(file)
-        a.download = file.name
-        a.click()
-        URL.revokeObjectURL(a.href)
+        // Desktop: baixa o PDF diretamente (mesmo comportamento do botão de download)
+        await generateChapaPDF()
       }
     } catch (e) {
       if (e?.name !== 'AbortError') {
         console.error('Erro ao compartilhar PDF:', e)
-        alert('Não foi possível compartilhar. Tente novamente.')
       }
     } finally {
       setPdfSharing(false)
