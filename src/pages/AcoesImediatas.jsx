@@ -1,27 +1,27 @@
 import { useState, useEffect, useCallback } from 'react'
-import { CheckCircle2, Star, ArrowLeft, Trophy, Users, Loader2, Download, Share2 } from 'lucide-react'
+import { CheckCircle2, Star, ArrowLeft, Trophy, Users, Loader2, Download, Share2, Zap } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { propostas, temas } from '../data/propostas'
+import { acoesImediatas } from '../data/acoesImediatas'
 import { useTheme } from '../context/ThemeContext'
 import { supabase } from '../lib/supabase'
 import { useVisitor } from '../hooks/useVisitor'
 import { Sun, Moon } from 'lucide-react'
 import { generateChapaPDF } from '../utils/generatePDF'
-import { generatePropostaShareImage } from '../utils/generatePropostaImage'
+import { generateAcaoShareImage } from '../utils/generateAcaoShareImage'
 
-// ─── Persistência local (fallback) ───────────────────────────────────────────
+// ─── Persistência local ───────────────────────────────────────────────────────
 function loadLocalRatings() {
-  try { return JSON.parse(localStorage.getItem('gl-ratings') || '{}') } catch { return {} }
+  try { return JSON.parse(localStorage.getItem('gl-acao-ratings') || '{}') } catch { return {} }
 }
 function saveLocalRating(id, value) {
   const c = loadLocalRatings(); c[id] = value
-  localStorage.setItem('gl-ratings', JSON.stringify(c))
+  localStorage.setItem('gl-acao-ratings', JSON.stringify(c))
 }
 
-// ─── Estrelas somente leitura (nota da comunidade) ───────────────────────────
+// ─── Estrelas somente leitura ─────────────────────────────────────────────────
 function StarsDisplay({ value, size = 14 }) {
-  const full  = Math.floor(value)
-  const frac  = value - full
+  const full = Math.floor(value)
+  const frac = value - full
   return (
     <div className="flex items-center gap-0.5">
       {[1,2,3,4,5].map(s => (
@@ -65,22 +65,22 @@ function NotaBadge({ media, total, loading }) {
   )
 }
 
-// ─── Avaliação interativa do usuário ─────────────────────────────────────────
-function StarRating({ propostaId, value, submitting, onChange }) {
+// ─── Avaliação interativa ─────────────────────────────────────────────────────
+function StarRating({ acaoId, value, submitting, onChange }) {
   const [hover, setHover] = useState(0)
-  const labels = ['', 'Pouco importante', 'Importante', 'Muito importante', 'Essencial', 'Prioridade máxima']
+  const labels = ['', 'Pouco urgente', 'Urgente', 'Muito urgente', 'Essencial', 'Prioridade máxima']
   const active = hover || value
 
   return (
     <div className="mt-4 pt-4 border-t border-slate-200 dark:border-navy-700">
       <p className="font-heading text-xs text-slate-500 dark:text-gray-500 tracking-widest uppercase mb-2">
-        {value > 0 ? 'Sua avaliação' : 'Avaliar importância'}
+        {value > 0 ? 'Sua avaliação' : 'Avaliar urgência'}
       </p>
       <div className="flex items-center gap-1">
         {[1,2,3,4,5].map(star => (
           <button
             key={star}
-            onClick={() => !submitting && onChange(propostaId, star)}
+            onClick={() => !submitting && onChange(acaoId, star)}
             onMouseEnter={() => setHover(star)}
             onMouseLeave={() => setHover(0)}
             disabled={submitting}
@@ -109,30 +109,22 @@ function StarRating({ propostaId, value, submitting, onChange }) {
   )
 }
 
-// ─── Escala de fontes por nível ───────────────────────────────────────────────
-const FONTE = [
-  { icone: 24, titulo: 16, descricao: 14, pontos: 14, check: 13 }, // nível 0 — normal
-  { icone: 28, titulo: 19, descricao: 17, pontos: 16, check: 15 }, // nível 1 — médio
-  { icone: 32, titulo: 22, descricao: 20, pontos: 19, check: 17 }, // nível 2 — grande
-]
-
-// ─── Card de proposta ─────────────────────────────────────────────────────────
-function PropostaCard({ proposta, userRating, communityData, submitting, onRate, fonteLevel }) {
+// ─── Card de ação ─────────────────────────────────────────────────────────────
+function AcaoCard({ acao, userRating, communityData, submitting, onRate }) {
   const { media, total, loading } = communityData
-  const f = FONTE[fonteLevel ?? 0]
   const [sharing, setSharing] = useState(false)
 
   async function handleShare() {
     setSharing(true)
     try {
-      const imageFile = await generatePropostaShareImage(proposta)
-      const url  = 'https://gestao-e-luta.vercel.app/propostas'
-      const text = `Apoio essa proposta da Chapa GESTÃO E LUTA: "${proposta.titulo}". Conheça todas as propostas!`
+      const imageFile = await generateAcaoShareImage(acao)
+      const url  = 'https://gestao-e-luta.vercel.app/acoes-imediatas'
+      const text = `Ação imediata nº ${acao.id} da Chapa GESTÃO E LUTA: "${acao.titulo}". Conheça as propostas e ações imediatas!`
 
       if (navigator.share && navigator.canShare?.({ files: [imageFile] })) {
-        await navigator.share({ title: proposta.titulo, text, url, files: [imageFile] })
+        await navigator.share({ title: acao.titulo, text, url, files: [imageFile] })
       } else if (navigator.share) {
-        await navigator.share({ title: proposta.titulo, text, url })
+        await navigator.share({ title: acao.titulo, text, url })
       } else {
         const a = document.createElement('a')
         a.href = URL.createObjectURL(imageFile)
@@ -155,19 +147,24 @@ function PropostaCard({ proposta, userRating, communityData, submitting, onRate,
                     hover:-translate-y-1 hover:shadow-xl hover:shadow-gold-500/5 hover:border-gold-500/40
                     transition-all duration-300 group flex flex-col">
 
-      {/* Header: ícone + título + nota comunitária */}
+      {/* Número + emoji + nota */}
       <div className="flex items-start gap-3 mb-4">
-        <span style={{ fontSize: f.icone }} className="shrink-0 leading-none">{proposta.icone}</span>
-        <div className="flex-1 min-w-0">
-          <h3 style={{ fontSize: f.titulo }} className="font-heading text-slate-900 dark:text-white tracking-wide leading-tight">
-            {proposta.titulo}
-          </h3>
-          <div className="w-8 h-0.5 bg-gold-500 mt-1.5 group-hover:w-14 transition-all duration-300" />
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <span className="font-heading font-bold text-gold-500 text-2xl tabular-nums shrink-0 leading-none">
+            {String(acao.id).padStart(2, '0')}
+          </span>
+          <span className="text-2xl leading-none shrink-0">{acao.icone}</span>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-heading text-slate-900 dark:text-white tracking-wide leading-tight text-base">
+              {acao.titulo}
+            </h3>
+            <div className="w-8 h-0.5 bg-gold-500 mt-1.5 group-hover:w-14 transition-all duration-300" />
+          </div>
         </div>
         <NotaBadge media={media} total={total} loading={loading} />
       </div>
 
-      {/* Barra de nota comunitária */}
+      {/* Barra de nota */}
       {!loading && total > 0 && (
         <div className="mb-3">
           <div className="h-1 bg-slate-100 dark:bg-navy-800 overflow-hidden rounded-full">
@@ -179,19 +176,10 @@ function PropostaCard({ proposta, userRating, communityData, submitting, onRate,
         </div>
       )}
 
-      {/* Descrição — tom amarelado no dark mode para melhor leitura */}
-      <p style={{ fontSize: f.descricao }} className="text-slate-700 dark:text-amber-200/90 leading-relaxed mb-4 flex-1">
-        {proposta.descricao}
+      {/* Descrição */}
+      <p className="text-slate-700 dark:text-amber-200/90 leading-relaxed mb-4 flex-1 text-sm">
+        {acao.descricao}
       </p>
-
-      <ul className="space-y-1.5 mb-4">
-        {proposta.pontos.map((pt, i) => (
-          <li key={i} style={{ fontSize: f.pontos }} className="flex items-start gap-2 text-slate-700 dark:text-gray-300">
-            <CheckCircle2 size={f.check} className="text-gold-500 shrink-0 mt-0.5" />
-            {pt}
-          </li>
-        ))}
-      </ul>
 
       {/* Botão compartilhar */}
       <button
@@ -205,12 +193,12 @@ function PropostaCard({ proposta, userRating, communityData, submitting, onRate,
       >
         {sharing
           ? <><Loader2 size={13} className="animate-spin" /> Gerando imagem…</>
-          : <><Share2 size={13} /> Compartilhar proposta</>
+          : <><Share2 size={13} /> Compartilhar ação</>
         }
       </button>
 
       <StarRating
-        propostaId={proposta.id}
+        acaoId={acao.id}
         value={userRating}
         submitting={submitting}
         onChange={onRate}
@@ -221,8 +209,8 @@ function PropostaCard({ proposta, userRating, communityData, submitting, onRate,
 
 // ─── Ranking comunitário ──────────────────────────────────────────────────────
 function RankingComunidade({ communityMap }) {
-  const ranked = propostas
-    .filter(p => communityMap[p.id]?.total > 0)
+  const ranked = acoesImediatas
+    .filter(a => communityMap[a.id]?.total > 0)
     .sort((a, b) => (communityMap[b.id]?.media || 0) - (communityMap[a.id]?.media || 0))
 
   if (ranked.length === 0) return null
@@ -232,19 +220,21 @@ function RankingComunidade({ communityMap }) {
       <div className="flex items-center gap-3 mb-5">
         <Trophy size={18} className="text-gold-500" />
         <h3 className="font-heading text-gold-500 tracking-widest uppercase text-sm">
-          Ranking da comunidade
+          Ranking de urgência — comunidade
         </h3>
       </div>
       <ol className="space-y-3">
-        {ranked.map((p, i) => {
-          const { media, total } = communityMap[p.id]
+        {ranked.map((a, i) => {
+          const { media, total } = communityMap[a.id]
           return (
-            <li key={p.id} className="flex items-center gap-3">
+            <li key={a.id} className="flex items-center gap-3">
               <span className={`font-heading text-base w-6 text-right shrink-0 ${
                 i === 0 ? 'text-gold-400' : i === 1 ? 'text-slate-300' : i === 2 ? 'text-amber-600' : 'text-navy-600'
               }`}>{i + 1}.</span>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-white font-heading tracking-wide leading-tight truncate">{p.titulo}</p>
+                <p className="text-sm text-white font-heading tracking-wide leading-tight truncate">
+                  {a.icone} {a.titulo}
+                </p>
                 <div className="h-1 bg-navy-800 mt-1 overflow-hidden rounded-full">
                   <div
                     className="h-full bg-gradient-to-r from-gold-600 to-gold-400 transition-all duration-700 rounded-full"
@@ -268,20 +258,87 @@ function RankingComunidade({ communityMap }) {
 }
 
 // ─── Página principal ─────────────────────────────────────────────────────────
-export default function PropostasPage() {
-  const [temaAtivo, setTemaAtivo]   = useState('todos')
-  const [userRatings, setUserRatings] = useState(loadLocalRatings)
-  // communityMap: { [proposalId]: { media, total, loading } }
+export default function AcoesImediatasPage() {
+  const [userRatings,  setUserRatings]  = useState(loadLocalRatings)
   const [communityMap, setCommunityMap] = useState(() =>
-    Object.fromEntries(propostas.map(p => [p.id, { media: 0, total: 0, loading: true }]))
+    Object.fromEntries(acoesImediatas.map(a => [a.id, { media: 0, total: 0, loading: true }]))
   )
-  const [submitting, setSubmitting] = useState({}) // { [proposalId]: bool }
+  const [submitting,  setSubmitting]  = useState({})
   const [pdfLoading,  setPdfLoading]  = useState(false)
   const [pdfSharing,  setPdfSharing]  = useState(false)
-  const [fonteLevel, setFonteLevel] = useState(0) // 0 = normal, 1 = médio, 2 = grande
   const visitor = useVisitor()
   const { dark, toggle } = useTheme()
 
+  useEffect(() => { window.scrollTo(0, 0) }, [])
+
+  // ── Carrega médias do Supabase ──────────────────────────────────────────────
+  const loadCommunityRatings = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('action_ratings')
+      .select('action_id, rating')
+
+    if (error || !data) {
+      setCommunityMap(prev =>
+        Object.fromEntries(Object.entries(prev).map(([id, v]) => [id, { ...v, loading: false }]))
+      )
+      return
+    }
+
+    const grouped = {}
+    data.forEach(({ action_id, rating }) => {
+      if (!grouped[action_id]) grouped[action_id] = []
+      grouped[action_id].push(rating)
+    })
+
+    setCommunityMap(
+      Object.fromEntries(
+        acoesImediatas.map(a => {
+          const list  = grouped[a.id] || []
+          const media = list.length ? list.reduce((x, y) => x + y, 0) / list.length : 0
+          return [a.id, { media, total: list.length, loading: false }]
+        })
+      )
+    )
+  }, [])
+
+  // ── Carrega avaliação própria do Supabase (por IP) ──────────────────────────
+  useEffect(() => {
+    if (!visitor?.ip) return
+    async function loadMyRatings() {
+      const { data } = await supabase
+        .from('action_ratings')
+        .select('action_id, rating')
+        .eq('ip_address', visitor.ip)
+      if (data && data.length > 0) {
+        const fromDb = Object.fromEntries(data.map(r => [r.action_id, r.rating]))
+        const merged = { ...loadLocalRatings(), ...fromDb }
+        setUserRatings(merged)
+        localStorage.setItem('gl-acao-ratings', JSON.stringify(merged))
+      }
+    }
+    loadMyRatings()
+  }, [visitor])
+
+  useEffect(() => { loadCommunityRatings() }, [loadCommunityRatings])
+
+  // ── Submete avaliação ───────────────────────────────────────────────────────
+  async function handleRate(id, value) {
+    const novo = { ...userRatings, [id]: value }
+    setUserRatings(novo)
+    saveLocalRating(id, value)
+    setSubmitting(s => ({ ...s, [id]: true }))
+
+    if (visitor?.ip) {
+      await supabase.from('action_ratings').upsert(
+        { action_id: id, rating: value, ip_address: visitor.ip },
+        { onConflict: 'action_id,ip_address' }
+      )
+      await loadCommunityRatings()
+    }
+    setSubmitting(s => ({ ...s, [id]: false }))
+  }
+
+  // ── PDF ─────────────────────────────────────────────────────────────────────
   async function handleDownloadPDF() {
     if (pdfLoading) return
     setPdfLoading(true)
@@ -301,7 +358,7 @@ export default function PropostasPage() {
     try {
       const file = await generateChapaPDF({ returnBlob: true })
       const url  = 'https://gestao-e-luta.vercel.app/'
-      const text = 'Conheça as propostas da Chapa 3 — GESTÃO E LUTA!'
+      const text = 'Conheça as propostas e as ações imediatas da Chapa 3 — GESTÃO E LUTA!'
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({ title: 'Chapa 3 — Gestão e Luta', text, url, files: [file] })
       } else if (navigator.share) {
@@ -323,82 +380,7 @@ export default function PropostasPage() {
     }
   }
 
-  useEffect(() => { window.scrollTo(0, 0) }, [])
-
-  // ── Carrega médias do Supabase ──────────────────────────────────────────────
-  const loadCommunityRatings = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('proposal_ratings')
-      .select('proposal_id, rating')
-
-    if (error || !data) {
-      // Tabela não existe ainda: zera loading
-      setCommunityMap(prev =>
-        Object.fromEntries(Object.entries(prev).map(([id, v]) => [id, { ...v, loading: false }]))
-      )
-      return
-    }
-
-    // Agrupa e calcula médias
-    const grouped = {}
-    data.forEach(({ proposal_id, rating }) => {
-      if (!grouped[proposal_id]) grouped[proposal_id] = []
-      grouped[proposal_id].push(rating)
-    })
-
-    setCommunityMap(
-      Object.fromEntries(
-        propostas.map(p => {
-          const list = grouped[p.id] || []
-          const media = list.length ? list.reduce((a, b) => a + b, 0) / list.length : 0
-          return [p.id, { media, total: list.length, loading: false }]
-        })
-      )
-    )
-  }, [])
-
-  // ── Carrega avaliação própria do Supabase (por IP) ──────────────────────────
-  useEffect(() => {
-    if (!visitor?.ip) return
-    async function loadMyRatings() {
-      const { data } = await supabase
-        .from('proposal_ratings')
-        .select('proposal_id, rating')
-        .eq('ip_address', visitor.ip)
-      if (data && data.length > 0) {
-        const fromDb = Object.fromEntries(data.map(r => [r.proposal_id, r.rating]))
-        const merged = { ...loadLocalRatings(), ...fromDb }
-        setUserRatings(merged)
-        localStorage.setItem('gl-ratings', JSON.stringify(merged))
-      }
-    }
-    loadMyRatings()
-  }, [visitor])
-
-  useEffect(() => { loadCommunityRatings() }, [loadCommunityRatings])
-
-  // ── Submete avaliação ───────────────────────────────────────────────────────
-  async function handleRate(id, value) {
-    // Atualiza UI imediatamente
-    const novo = { ...userRatings, [id]: value }
-    setUserRatings(novo)
-    saveLocalRating(id, value)
-    setSubmitting(s => ({ ...s, [id]: true }))
-
-    if (visitor?.ip) {
-      await supabase.from('proposal_ratings').upsert(
-        { proposal_id: id, rating: value, ip_address: visitor.ip },
-        { onConflict: 'proposal_id,ip_address' }
-      )
-      await loadCommunityRatings()
-    }
-    setSubmitting(s => ({ ...s, [id]: false }))
-  }
-
   const totalAvaliadas = Object.keys(userRatings).length
-  const propostasFiltradas = temaAtivo === 'todos'
-    ? propostas
-    : propostas.filter(p => p.tema === temaAtivo)
 
   return (
     <div className="min-h-screen bg-white dark:bg-navy-950">
@@ -412,15 +394,10 @@ export default function PropostasPage() {
           <span className="font-heading text-white tracking-widest text-sm hidden sm:block">
             GESTÃO <span className="text-gold-500">&</span> LUTA
           </span>
-          <div className="flex items-center gap-4">
-            <Link to="/acoes-imediatas" className="font-heading text-xs tracking-widest uppercase text-slate-400 hover:text-gold-500 transition-colors hidden sm:block">
-              Ações Imediatas
-            </Link>
-            <button onClick={toggle} className="flex items-center gap-1.5 text-slate-400 hover:text-gold-500 transition-colors">
-              {dark ? <Sun size={14} /> : <Moon size={14} />}
-              <span className="font-heading text-xs tracking-widest uppercase">{dark ? 'Claro' : 'Escuro'}</span>
-            </button>
-          </div>
+          <button onClick={toggle} className="flex items-center gap-1.5 text-slate-400 hover:text-gold-500 transition-colors">
+            {dark ? <Sun size={14} /> : <Moon size={14} />}
+            <span className="font-heading text-xs tracking-widest uppercase">{dark ? 'Claro' : 'Escuro'}</span>
+          </button>
         </div>
       </div>
 
@@ -430,153 +407,80 @@ export default function PropostasPage() {
           <div className="absolute inset-0" style={{ backgroundImage: `repeating-linear-gradient(45deg,#C9A227,#C9A227 1px,transparent 1px,transparent 40px)` }} />
         </div>
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-gold-500 to-transparent" />
+
         <div className="relative z-10 text-center px-4">
-          <p className="font-heading text-gold-500 text-sm tracking-widest uppercase mb-2">Nossa plataforma</p>
-          <h1 className="font-heading font-bold text-white text-5xl md:text-7xl tracking-widest uppercase mb-4">Propostas</h1>
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 bg-gold-500/10 border border-gold-500/30 px-4 py-1.5 mb-4">
+            <Zap size={13} className="text-gold-500" />
+            <span className="font-heading text-gold-500 text-xs tracking-widest uppercase">Chapa 3 — SINDPOL-RJ</span>
+          </div>
+
+          <h1 className="font-heading font-bold text-white text-5xl md:text-7xl tracking-widest uppercase mb-4">
+            Ações Imediatas
+          </h1>
           <div className="flex items-center justify-center gap-4 my-4">
             <div className="h-px bg-gold-500/40 flex-1 max-w-24" />
             <span className="text-gold-500">✦</span>
             <div className="h-px bg-gold-500/40 flex-1 max-w-24" />
           </div>
-          <p className="text-gray-400 max-w-xl mx-auto text-sm leading-relaxed">
-            Não são apenas promessas. São compromissos com prazo, responsável e método claro de execução.
+
+          <p className="text-gray-400 max-w-2xl mx-auto text-sm leading-relaxed">
+            <span className="text-gold-400 font-medium">Quem já fez e sabe o caminho não precisa prometer ilusões.</span>
             <br />
-            <span className="text-gold-400">Avalie de 1 a 5 quais propostas são mais importantes para você.</span>
+            Estas são as ações que executaremos nos primeiros dias de gestão — não promessas, compromissos com prazo e responsável.
+            <br className="hidden sm:block" />
+            <span className="text-gold-400">Avalie de 1 a 5 quais ações são mais urgentes para você.</span>
           </p>
+
           {totalAvaliadas > 0 && (
             <div className="mt-6 inline-flex items-center gap-2 bg-gold-500/10 border border-gold-500/30 px-4 py-2">
               <Star size={14} className="text-gold-500 fill-gold-500" />
               <span className="font-heading text-gold-400 text-xs tracking-widest uppercase">
-                {totalAvaliadas} de {propostas.length} propostas avaliadas por você
+                {totalAvaliadas} de {acoesImediatas.length} ações avaliadas por você
               </span>
             </div>
           )}
 
+          {/* Botões PDF */}
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <button
               onClick={handleDownloadPDF}
               disabled={pdfLoading || pdfSharing}
               className="inline-flex items-center gap-2 bg-gold-500 hover:bg-gold-400 text-navy-950 font-heading text-xs tracking-widest uppercase px-6 py-3 transition-all disabled:opacity-60 disabled:cursor-wait shadow-lg shadow-gold-500/20"
             >
-              {pdfLoading ? (
-                <><Loader2 size={14} className="animate-spin" /> Gerando PDF…</>
-              ) : (
-                <><Download size={14} /> Baixar PDF da Chapa</>
-              )}
+              {pdfLoading
+                ? <><Loader2 size={14} className="animate-spin" /> Gerando PDF…</>
+                : <><Download size={14} /> Baixar PDF (Propostas + Ações)</>
+              }
             </button>
             <button
               onClick={handleSharePDF}
               disabled={pdfLoading || pdfSharing}
               className="inline-flex items-center gap-2 border border-gold-500/60 text-gold-400 hover:bg-gold-500/10 font-heading text-xs tracking-widest uppercase px-6 py-3 transition-all disabled:opacity-60 disabled:cursor-wait"
             >
-              {pdfSharing ? (
-                <><Loader2 size={14} className="animate-spin" /> Gerando PDF…</>
-              ) : (
-                <><Share2 size={14} /> Compartilhar PDF</>
-              )}
+              {pdfSharing
+                ? <><Loader2 size={14} className="animate-spin" /> Gerando PDF…</>
+                : <><Share2 size={14} /> Compartilhar PDF</>
+              }
             </button>
           </div>
         </div>
       </div>
 
-      {/* ── Filtros ── */}
-      <div className="sticky top-0 z-40 bg-white/95 dark:bg-navy-950/95 backdrop-blur border-b border-slate-200 dark:border-navy-800 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-1 overflow-x-auto py-3">
-            <button
-              onClick={() => setTemaAtivo('todos')}
-              className={`flex-shrink-0 font-heading text-xs tracking-widest uppercase px-4 py-2 transition-all ${
-                temaAtivo === 'todos' ? 'bg-gold-500 text-navy-950' : 'text-slate-600 dark:text-gray-400 hover:text-gold-500 border border-slate-200 dark:border-navy-700'
-              }`}
-            >Todas</button>
-            {temas.map(t => (
-              <button
-                key={t.id}
-                onClick={() => setTemaAtivo(t.id)}
-                className={`flex-shrink-0 flex items-center gap-1.5 font-heading text-xs tracking-widest uppercase px-4 py-2 transition-all ${
-                  temaAtivo === t.id ? 'bg-gold-500 text-navy-950' : 'text-slate-600 dark:text-gray-400 hover:text-gold-500 border border-slate-200 dark:border-navy-700'
-                }`}
-              >
-                <span>{t.icone}</span>
-                <span className="hidden sm:inline">{t.label}</span>
-              </button>
-            ))}
-
-            {/* Botão 3 níveis de fonte */}
-            <button
-              onClick={() => setFonteLevel(l => (l + 1) % 3)}
-              title={['Fonte normal — clique para aumentar', 'Fonte média — clique para aumentar mais', 'Fonte grande — clique para voltar ao normal'][fonteLevel]}
-              className="flex-shrink-0 ml-auto flex items-center gap-0.5 px-3 py-2 border transition-all border-slate-200 dark:border-navy-700 hover:border-gold-500 hover:text-gold-500 text-slate-600 dark:text-gray-400"
-            >
-              {[0,1,2].map(i => (
-                <span
-                  key={i}
-                  className="font-heading font-bold leading-none transition-colors"
-                  style={{
-                    fontSize: `${10 + i * 3}px`,
-                    color: i <= fonteLevel ? '#d4af37' : undefined,
-                  }}
-                >A</span>
-              ))}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Grid ── */}
+      {/* ── Grid de Ações ── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {temaAtivo !== 'todos' ? (
-          <>
-            <div className="mb-8">
-              <h2 className="font-heading text-2xl text-slate-900 dark:text-white tracking-widest uppercase">
-                {temas.find(t => t.id === temaAtivo)?.icone} {temas.find(t => t.id === temaAtivo)?.label}
-              </h2>
-              <div className="h-px bg-gold-500/40 mt-3" />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {propostasFiltradas.map(p => (
-                <PropostaCard
-                  key={p.id}
-                  proposta={p}
-                  userRating={userRatings[p.id] || 0}
-                  communityData={communityMap[p.id] || { media: 0, total: 0, loading: false }}
-                  submitting={!!submitting[p.id]}
-                  onRate={handleRate}
-                  fonteLevel={fonteLevel}
-                />
-              ))}
-            </div>
-          </>
-        ) : (
-          temas.map(tema => {
-            const grupo = propostas.filter(p => p.tema === tema.id)
-            if (!grupo.length) return null
-            return (
-              <div key={tema.id} className="mb-14">
-                <div className="flex items-center gap-3 mb-6">
-                  <span className="text-2xl">{tema.icone}</span>
-                  <div>
-                    <h2 className="font-heading text-xl text-slate-900 dark:text-white tracking-widest uppercase">{tema.label}</h2>
-                    <div className="h-0.5 bg-gold-500 w-12 mt-1" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {grupo.map(p => (
-                    <PropostaCard
-                      key={p.id}
-                      proposta={p}
-                      userRating={userRatings[p.id] || 0}
-                      communityData={communityMap[p.id] || { media: 0, total: 0, loading: false }}
-                      submitting={!!submitting[p.id]}
-                      onRate={handleRate}
-                      fonteLevel={fonteLevel}
-                    />
-                  ))}
-                </div>
-              </div>
-            )
-          })
-        )}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {acoesImediatas.map(a => (
+            <AcaoCard
+              key={a.id}
+              acao={a}
+              userRating={userRatings[a.id] || 0}
+              communityData={communityMap[a.id] || { media: 0, total: 0, loading: false }}
+              submitting={!!submitting[a.id]}
+              onRate={handleRate}
+            />
+          ))}
+        </div>
 
         <RankingComunidade communityMap={communityMap} />
       </div>

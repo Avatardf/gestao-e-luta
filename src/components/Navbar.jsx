@@ -7,8 +7,9 @@ import { supabase } from '../lib/supabase'
 const links = [
   { href: '#sobre',      label: 'Sobre',      page: true },
   { href: '#diretores',  label: 'Diretores',  page: true },
-  { href: '/propostas',  label: 'Propostas',  page: false },
-  { href: '/kit',        label: 'Kit',        page: false },
+  { href: '/propostas',       label: 'Propostas',  page: false },
+  { href: '/acoes-imediatas', label: 'Ações',      page: false },
+  { href: '/kit',             label: 'Kit',        page: false },
   { href: '#votacao',    label: 'Vote Agora', page: true },
   { href: '#contato',    label: 'Contato',    page: true },
 ]

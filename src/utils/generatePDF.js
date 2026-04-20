@@ -2,6 +2,7 @@ import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
 import { supabase } from '../lib/supabase'
 import { diretores as diretoresFallback } from '../data/diretores'
+import { acoesImediatas } from '../data/acoesImediatas'
 
 const SITE_URL = 'https://gestao-e-luta.vercel.app/'
 
@@ -72,7 +73,7 @@ function footerHTML(page) {
       </div>
       <div style="text-align:right;font-family:Oswald,sans-serif;flex-shrink:0;">
         <div style="font-size:13px;letter-spacing:2px;color:#d4af37;font-weight:600;">ELEIÇÃO: 09.05.2026</div>
-        <div style="font-size:10px;letter-spacing:2px;color:#64748b;margin-top:1px;">PÁGINA ${page} DE 2</div>
+        <div style="font-size:10px;letter-spacing:2px;color:#64748b;margin-top:1px;">PÁGINA ${page} DE 3</div>
       </div>
     </div>`
 }
@@ -217,6 +218,61 @@ function buildPage2() {
   </div>`
 }
 
+function buildPage3() {
+  const acaoCard = (a) => `
+    <div style="display:flex;align-items:stretch;background:#fff;border:1px solid #cbd5e1;
+                border-radius:6px;overflow:hidden;box-shadow:0 2px 8px rgba(15,23,42,0.07);margin-bottom:6px;">
+      <div style="width:52px;flex-shrink:0;background:linear-gradient(180deg,#0f172a 0%,#1e293b 100%);
+                  color:#d4af37;font-family:Oswald,sans-serif;font-weight:700;font-size:22px;
+                  display:flex;align-items:center;justify-content:center;position:relative;">
+        ${a.id}
+        <div style="position:absolute;right:-9px;top:0;bottom:0;width:9px;
+                    background:linear-gradient(180deg,#0f172a 0%,#1e293b 100%);
+                    clip-path:polygon(0 0,100% 50%,0 100%);"></div>
+      </div>
+      <div style="flex:1;padding:7px 12px 7px 18px;">
+        <div style="font-family:Oswald,sans-serif;font-weight:600;font-size:13.5px;letter-spacing:0.4px;
+                    color:#0f172a;line-height:1.2;text-transform:uppercase;margin-bottom:3px;">
+          ${a.icone} ${a.titulo}
+        </div>
+        <div style="font-size:11.5px;color:#475569;font-weight:500;line-height:1.4;">${a.descricao}</div>
+      </div>
+    </div>`
+
+  const leftItems  = acoesImediatas.filter(a => a.id <= 8)
+  const rightItems = acoesImediatas.filter(a => a.id > 8)
+
+  return `
+  <div id="pdf-p3" style="width:794px;height:1123px;background:linear-gradient(180deg,#f1f5f9 0%,#e2e8f0 100%);
+       color:#0f172a;position:relative;overflow:hidden;display:flex;flex-direction:column;font-family:Inter,sans-serif;">
+
+    <!-- HEADER -->
+    <div style="background:linear-gradient(135deg,#0b1a2e 0%,#0f172a 50%,#1e293b 100%);padding:12px 36px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #d4af37;flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:36px;height:36px;background:linear-gradient(135deg,#f4d06f,#d4af37 55%,#a8821c);display:flex;align-items:center;justify-content:center;font-family:Oswald,sans-serif;font-weight:700;color:#0f172a;font-size:13px;">GL</div>
+        <div style="font-family:Oswald,sans-serif;font-weight:600;letter-spacing:3px;font-size:14px;color:#fff;">GESTÃO <span style="color:#d4af37;">&amp;</span> LUTA</div>
+      </div>
+      <div style="font-family:Oswald,sans-serif;font-weight:700;font-size:20px;letter-spacing:3px;color:#d4af37;">CHAPA 3</div>
+    </div>
+
+    <!-- TITLE + INTRO -->
+    <div style="text-align:center;padding:12px 36px 6px;flex-shrink:0;">
+      <h2 style="font-family:Oswald,sans-serif;font-weight:700;font-size:24px;letter-spacing:4px;color:#0f172a;text-transform:uppercase;display:inline-block;">Ações Imediatas</h2>
+      <p style="font-size:12px;color:#64748b;margin:6px 0 0;font-style:italic;line-height:1.5;">
+        Quem já fez e sabe o caminho não precisa prometer ilusões. Estas são as ações que executaremos nos primeiros dias de gestão.
+      </p>
+    </div>
+
+    <!-- GRID -->
+    <div style="flex:1;padding:4px 24px 0;display:grid;grid-template-columns:1fr 1fr;gap:0 12px;min-height:0;">
+      <div>${leftItems.map(acaoCard).join('')}</div>
+      <div>${rightItems.map(acaoCard).join('')}</div>
+    </div>
+
+    ${footerHTML(3)}
+  </div>`
+}
+
 export async function generateChapaPDF({ returnBlob = false } = {}) {
   let diretores
   try {
@@ -232,7 +288,7 @@ export async function generateChapaPDF({ returnBlob = false } = {}) {
 
   const wrapper = document.createElement('div')
   wrapper.style.cssText = 'position:fixed;top:0;left:-9999px;z-index:-1;display:flex;flex-direction:column;gap:0;'
-  wrapper.innerHTML = await buildPage1(withPhotos) + buildPage2()
+  wrapper.innerHTML = await buildPage1(withPhotos) + buildPage2() + buildPage3()
   document.body.appendChild(wrapper)
 
   try {
@@ -243,7 +299,7 @@ export async function generateChapaPDF({ returnBlob = false } = {}) {
     // Escala px → mm: 794px = 210mm
     const pxToMm = 210 / 794
 
-    for (const [i, id] of [['pdf-p1', 1], ['pdf-p2', 2]]) {
+    for (const [i, id] of [['pdf-p1', 1], ['pdf-p2', 2], ['pdf-p3', 3]]) {
       const node = wrapper.querySelector(`#${i}`)
       const canvas = await html2canvas(node, {
         scale, useCORS: true, backgroundColor: '#f1f5f9',

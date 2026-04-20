@@ -12,6 +12,7 @@ import Footer from './components/Footer'
 import Admin from './pages/Admin'
 import PropostasPage from './pages/Propostas'
 import KitPage from './pages/Kit'
+import AcoesImediatasPage from './pages/AcoesImediatas'
 import { useVisitor } from './hooks/useVisitor'
 
 function Site() {
@@ -51,8 +52,9 @@ export default function App() {
         <Routes>
           <Route path="/"      element={<Site />} />
           <Route path="/admin"     element={<Admin />} />
-          <Route path="/propostas" element={<PropostasPage />} />
-          <Route path="/kit"       element={<KitPage />} />
+          <Route path="/propostas"       element={<PropostasPage />} />
+          <Route path="/acoes-imediatas" element={<AcoesImediatasPage />} />
+          <Route path="/kit"             element={<KitPage />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
