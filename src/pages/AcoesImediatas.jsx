@@ -1,13 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
-import { CheckCircle2, Star, ArrowLeft, Trophy, Users, Loader2, Download, Share2, Zap } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Star, Trophy, Users, Loader2, Download, Share2, Zap } from 'lucide-react'
 import { acoesImediatas } from '../data/acoesImediatas'
-import { useTheme } from '../context/ThemeContext'
 import { supabase } from '../lib/supabase'
 import { useVisitor } from '../hooks/useVisitor'
-import { Sun, Moon } from 'lucide-react'
 import { generateChapaPDF } from '../utils/generatePDF'
 import { generateAcaoShareImage } from '../utils/generateAcaoShareImage'
+import Navbar from '../components/Navbar'
 
 // ─── Persistência local ───────────────────────────────────────────────────────
 function loadLocalRatings() {
@@ -267,7 +265,6 @@ export default function AcoesImediatasPage() {
   const [pdfLoading,  setPdfLoading]  = useState(false)
   const [pdfSharing,  setPdfSharing]  = useState(false)
   const visitor = useVisitor()
-  const { dark, toggle } = useTheme()
 
   useEffect(() => { window.scrollTo(0, 0) }, [])
 
@@ -384,25 +381,10 @@ export default function AcoesImediatasPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-navy-950">
-
-      {/* ── Topo ── */}
-      <div className="bg-navy-950 border-b border-navy-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-slate-400 hover:text-gold-500 transition-colors font-heading text-xs tracking-widest uppercase">
-            <ArrowLeft size={14} /> Voltar ao site
-          </Link>
-          <span className="font-heading text-white tracking-widest text-sm hidden sm:block">
-            GESTÃO <span className="text-gold-500">&</span> LUTA
-          </span>
-          <button onClick={toggle} className="flex items-center gap-1.5 text-slate-400 hover:text-gold-500 transition-colors">
-            {dark ? <Sun size={14} /> : <Moon size={14} />}
-            <span className="font-heading text-xs tracking-widest uppercase">{dark ? 'Claro' : 'Escuro'}</span>
-          </button>
-        </div>
-      </div>
+      <Navbar />
 
       {/* ── Hero ── */}
-      <div className="relative bg-navy-950 py-20 overflow-hidden">
+      <div className="relative bg-navy-950 pt-36 pb-20 overflow-hidden">
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0" style={{ backgroundImage: `repeating-linear-gradient(45deg,#C9A227,#C9A227 1px,transparent 1px,transparent 40px)` }} />
         </div>
