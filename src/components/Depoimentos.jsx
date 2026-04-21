@@ -121,6 +121,7 @@ function FormDepoimento({ onEnviado }) {
     setLoading(true)
     const { error } = await supabase.from('depoimentos').insert({
       nome: form.nome, lotacao: form.lotacao || null, texto: form.texto,
+      status: 'pending',
     })
     setLoading(false)
     if (error) { setErro('Erro ao enviar. Tente novamente.'); return }
@@ -168,7 +169,11 @@ export default function Depoimentos() {
 
   async function carregar() {
     setLoading(true)
-    const { data } = await supabase.from('depoimentos').select('*').order('created_at', { ascending: false })
+    const { data } = await supabase
+      .from('depoimentos')
+      .select('*')
+      .eq('status', 'approved')
+      .order('created_at', { ascending: false })
     if (data) setItens(data)
     setLoading(false)
   }
@@ -207,8 +212,13 @@ export default function Depoimentos() {
           {enviado ? (
             <div className="bg-gold-500/10 border border-gold-500/40 p-8 text-center max-w-xl mx-auto">
               <CheckCircle2 className="text-gold-500 mx-auto mb-3" size={36} />
-              <p className="font-heading text-slate-900 dark:text-white tracking-widest mb-2">Depoimento enviado!</p>
-              <p className="text-slate-600 dark:text-gray-400 text-sm">Obrigado pelo seu apoio, companheiro!</p>
+              <p className="font-heading text-slate-900 dark:text-white tracking-widest mb-2">Depoimento recebido!</p>
+              <p className="text-slate-600 dark:text-gray-400 text-sm">
+                Obrigado pelo seu apoio, companheiro!<br />
+                <span className="text-slate-500 dark:text-gray-500 text-xs mt-1 block">
+                  Seu depoimento será publicado após análise da administração.
+                </span>
+              </p>
               <button onClick={() => setEnviado(false)} className="mt-5 btn-outline text-sm">Enviar outro</button>
             </div>
           ) : (

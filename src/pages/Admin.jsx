@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
-import { Shield, RefreshCw, Trash2, LogOut, Loader2, Users, Vote, MapPin, Clock, Edit2, Save, X, ChevronDown, ChevronUp, Camera, Plus, Newspaper, MessageSquare, Crop } from 'lucide-react'
+import { Shield, RefreshCw, Trash2, LogOut, Loader2, Users, Vote, MapPin, Clock, Edit2, Save, X, ChevronDown, ChevronUp, Camera, Plus, Newspaper, MessageSquare, Crop, Check, Clock3 } from 'lucide-react'
 
 const META       = 600
 const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASSWORD || 'gestao2025'
@@ -725,7 +725,16 @@ export default function Admin() {
                     : t === 'visitas' ? `Visitas (${visits.length})`
                     : t === 'diretores' ? `Diretores (${directors.length})`
                     : t === 'mensagens' ? `Mensagens (${messages.length})`
-                    : t === 'depoimentos' ? `Depoimentos (${depoimentos.length})`
+                    : t === 'depoimentos' ? (
+                      <span className="flex items-center gap-2">
+                        {`Depoimentos (${depoimentos.length})`}
+                        {depoimentos.filter(d => d.status === 'pending').length > 0 && (
+                          <span className="bg-amber-500 text-navy-950 font-bold text-[10px] px-1.5 py-0.5 leading-none rounded-sm">
+                            {depoimentos.filter(d => d.status === 'pending').length}
+                          </span>
+                        )}
+                      </span>
+                    )
                     : `Notícias (${noticias.length})`}
                 </button>
               ))}
@@ -831,37 +840,139 @@ export default function Admin() {
             )}
 
             {/* Depoimentos */}
-            {tab === 'depoimentos' && (
-              <div className="space-y-3">
-                <p className="text-gray-500 text-xs mb-4">Exclua depoimentos ofensivos ou inadequados.</p>
-                {depoimentos.length === 0 && (
-                  <div className="text-center py-12 text-gray-600">Nenhum depoimento ainda.</div>
-                )}
-                {depoimentos.map(d => (
-                  <div key={d.id} className="border border-navy-700 bg-navy-950 p-5 flex gap-4 items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-1">
+            {tab === 'depoimentos' && (() => {
+              const pending  = depoimentos.filter(d => d.status === 'pending')
+              const approved = depoimentos.filter(d => d.status === 'approved')
+              const rejected = depoimentos.filter(d => d.status === 'rejected')
+
+              async function setStatus(id, status) {
+                await supabase.from('depoimentos').update({ status }).eq('id', id)
+                loadData()
+              }
+              async function excluir(id) {
+                if (!confirm('Excluir este depoimento permanentemente?')) return
+                await supabase.from('depoimentos').delete().eq('id', id)
+                loadData()
+              }
+
+              function DepoCard({ d, actions }) {
+                return (
+                  <div className="border border-navy-700 bg-navy-950 p-5 flex gap-4 items-start">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-1 flex-wrap">
                         <p className="font-heading text-white text-sm tracking-wide">{d.nome}</p>
                         {d.lotacao && <span className="text-gold-500 text-xs font-heading tracking-widest uppercase">{d.lotacao}</span>}
                       </div>
                       <p className="text-gray-300 text-sm leading-relaxed">"{d.texto}"</p>
                       <p className="text-gray-600 text-xs mt-2">{fmt(d.created_at)}</p>
                     </div>
-                    <button
-                      onClick={async () => {
-                        if (!confirm('Excluir este depoimento?')) return
-                        await supabase.from('depoimentos').delete().eq('id', d.id)
-                        loadData()
-                      }}
-                      className="text-red-500/50 hover:text-red-400 transition-colors flex-shrink-0"
-                      title="Excluir"
-                    >
-                      <Trash2 size={15} />
-                    </button>
+                    <div className="flex items-center gap-2 flex-shrink-0">{actions(d)}</div>
                   </div>
-                ))}
-              </div>
-            )}
+                )
+              }
+
+              return (
+                <div className="space-y-8">
+                  {/* Pendentes */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Clock3 size={13} className="text-amber-400" />
+                      <h4 className="font-heading text-xs text-amber-400 uppercase tracking-widest">
+                        Aguardando aprovação ({pending.length})
+                      </h4>
+                    </div>
+                    {pending.length === 0 && (
+                      <div className="text-center py-8 text-gray-600 border border-navy-800 text-sm">Nenhum depoimento pendente.</div>
+                    )}
+                    <div className="space-y-3">
+                      {pending.map(d => (
+                        <DepoCard key={d.id} d={d} actions={d => (<>
+                          <button
+                            onClick={() => setStatus(d.id, 'approved')}
+                            className="flex items-center gap-1.5 bg-green-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20 transition-colors font-heading text-xs uppercase tracking-widest px-3 py-2"
+                            title="Aprovar"
+                          >
+                            <Check size={12} /> Aprovar
+                          </button>
+                          <button
+                            onClick={() => setStatus(d.id, 'rejected')}
+                            className="flex items-center gap-1.5 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-colors font-heading text-xs uppercase tracking-widest px-3 py-2"
+                            title="Rejeitar"
+                          >
+                            <X size={12} /> Rejeitar
+                          </button>
+                        </>)} />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Aprovados */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Check size={13} className="text-green-400" />
+                      <h4 className="font-heading text-xs text-green-400 uppercase tracking-widest">
+                        Publicados ({approved.length})
+                      </h4>
+                    </div>
+                    {approved.length === 0 && (
+                      <div className="text-center py-8 text-gray-600 border border-navy-800 text-sm">Nenhum depoimento publicado.</div>
+                    )}
+                    <div className="space-y-3">
+                      {approved.map(d => (
+                        <DepoCard key={d.id} d={d} actions={d => (<>
+                          <button
+                            onClick={() => setStatus(d.id, 'pending')}
+                            className="text-amber-500/60 hover:text-amber-400 transition-colors"
+                            title="Mover para pendentes"
+                          >
+                            <Clock3 size={15} />
+                          </button>
+                          <button
+                            onClick={() => excluir(d.id)}
+                            className="text-red-500/50 hover:text-red-400 transition-colors"
+                            title="Excluir"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </>)} />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Rejeitados */}
+                  {rejected.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <X size={13} className="text-red-400" />
+                        <h4 className="font-heading text-xs text-red-400 uppercase tracking-widest">
+                          Rejeitados ({rejected.length})
+                        </h4>
+                      </div>
+                      <div className="space-y-3">
+                        {rejected.map(d => (
+                          <DepoCard key={d.id} d={d} actions={d => (<>
+                            <button
+                              onClick={() => setStatus(d.id, 'approved')}
+                              className="text-green-500/60 hover:text-green-400 transition-colors"
+                              title="Aprovar"
+                            >
+                              <Check size={15} />
+                            </button>
+                            <button
+                              onClick={() => excluir(d.id)}
+                              className="text-red-500/50 hover:text-red-400 transition-colors"
+                              title="Excluir"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </>)} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
 
             {/* Notícias */}
             {tab === 'noticias' && <NoticiaAdmin noticias={noticias} onRefresh={loadData} />}
