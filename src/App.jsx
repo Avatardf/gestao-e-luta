@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ThemeProvider } from './context/ThemeContext'
+import Disclaimer from './components/Disclaimer'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Sobre from './components/Sobre'
@@ -49,6 +50,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
+        <Disclaimer />
         <Routes>
           <Route path="/"      element={<Site />} />
           <Route path="/admin"     element={<Admin />} />
