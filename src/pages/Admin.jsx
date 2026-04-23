@@ -741,36 +741,158 @@ export default function Admin() {
             </div>
 
             {/* Votes */}
-            {tab === 'votos' && (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-navy-700">
-                      {['#','IP','Chapa','Cidade','Estado','Data/Hora'].map(h => (
-                        <th key={h} className="text-left font-heading text-xs text-gray-500 uppercase tracking-widest px-4 py-3">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {votes.map((v, i) => (
-                      <tr key={v.id} className="border-b border-navy-800 hover:bg-navy-900 transition-colors">
-                        <td className="px-4 py-3 text-gray-600 text-xs">{votes.length - i}</td>
-                        <td className="px-4 py-3 text-gray-300 font-mono text-xs">{v.ip_address}</td>
-                        <td className="px-4 py-3">
-                          <span className={`font-heading text-xs tracking-wide ${v.chapa_id === 1 ? 'text-gold-400' : 'text-gray-400'}`}>{v.chapa_nome}</span>
-                        </td>
-                        <td className="px-4 py-3 text-gray-400 text-xs">{v.city || '—'}</td>
-                        <td className="px-4 py-3 text-gray-400 text-xs">{v.region || '—'}</td>
-                        <td className="px-4 py-3 text-gray-500 text-xs">{fmt(v.created_at)}</td>
-                      </tr>
-                    ))}
-                    {votes.length === 0 && (
-                      <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-600">Nenhum voto registrado ainda.</td></tr>
+            {tab === 'votos' && (() => {
+              const chapasOpts = [
+                { id: 1, nome: 'GESTÃO E LUTA — Chapa 3' },
+                { id: 2, nome: 'Chapa 1' },
+                { id: 3, nome: 'Chapa 2' },
+                { id: 4, nome: 'Chapa 4' },
+              ]
+              const [addForm, setAddForm]     = useState({ qtd: 1, chapId: 1, city: '', region: '' })
+              const [adding,  setAdding]      = useState(false)
+              const [addOpen, setAddOpen]     = useState(false)
+              const [addMsg,  setAddMsg]      = useState('')
+
+              function randIp() {
+                // Gera IPs em faixas de uso geral (não reservadas)
+                const octet = () => Math.floor(Math.random() * 200) + 20
+                return `${octet()}.${octet()}.${octet()}.${octet()}`
+              }
+
+              async function handleAddVotes() {
+                const { qtd, chapId, city, region } = addForm
+                if (qtd < 1 || qtd > 100) return
+                setAdding(true)
+                setAddMsg('')
+                const chapa = chapasOpts.find(c => c.id === chapId)
+                const rows = Array.from({ length: qtd }, () => ({
+                  ip_address: randIp(),
+                  chapa_id:   chapId,
+                  chapa_nome: chapa.nome,
+                  city:       city  || null,
+                  region:     region || null,
+                  country:    'Brasil',
+                }))
+                const { error } = await supabase.from('votes').insert(rows)
+                setAdding(false)
+                if (error) {
+                  setAddMsg(`Erro: ${error.message}`)
+                } else {
+                  setAddMsg(`✓ ${qtd} voto(s) registrado(s) com IPs únicos.`)
+                  setAddForm(f => ({ ...f, qtd: 1 }))
+                  loadData()
+                }
+              }
+
+              return (
+                <div className="space-y-4">
+                  {/* Painel de registro manual */}
+                  <div className="border border-navy-700 bg-navy-950">
+                    <button
+                      onClick={() => { setAddOpen(o => !o); setAddMsg('') }}
+                      className="w-full flex items-center justify-between px-5 py-3 hover:bg-navy-900 transition-colors"
+                    >
+                      <span className="font-heading text-xs text-gold-400 uppercase tracking-widest flex items-center gap-2">
+                        <Plus size={13} /> Registrar Votos Manualmente
+                      </span>
+                      {addOpen ? <ChevronUp size={15} className="text-gray-500" /> : <ChevronDown size={15} className="text-gray-500" />}
+                    </button>
+
+                    {addOpen && (
+                      <div className="border-t border-navy-700 p-5 space-y-4">
+                        <p className="text-gray-500 text-xs">Cada voto recebe um IP único gerado aleatoriamente.</p>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                          <div>
+                            <label className="block font-heading text-xs text-gray-500 uppercase tracking-widest mb-1.5">Quantidade (1-100)</label>
+                            <input
+                              type="number" min={1} max={100}
+                              value={addForm.qtd}
+                              onChange={e => setAddForm(f => ({ ...f, qtd: Math.max(1, Math.min(100, Number(e.target.value))) }))}
+                              className="w-full bg-navy-900 border border-navy-700 text-white px-3 py-2 text-sm focus:outline-none focus:border-gold-500 transition-colors"
+                            />
+                          </div>
+                          <div>
+                            <label className="block font-heading text-xs text-gray-500 uppercase tracking-widest mb-1.5">Chapa</label>
+                            <select
+                              value={addForm.chapId}
+                              onChange={e => setAddForm(f => ({ ...f, chapId: Number(e.target.value) }))}
+                              className="w-full bg-navy-900 border border-navy-700 text-white px-3 py-2 text-sm focus:outline-none focus:border-gold-500 transition-colors"
+                            >
+                              {chapasOpts.map(c => (
+                                <option key={c.id} value={c.id}>{c.nome}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block font-heading text-xs text-gray-500 uppercase tracking-widest mb-1.5">Cidade (opcional)</label>
+                            <input
+                              value={addForm.city}
+                              onChange={e => setAddForm(f => ({ ...f, city: e.target.value }))}
+                              placeholder="Ex: Rio de Janeiro"
+                              className="w-full bg-navy-900 border border-navy-700 text-white px-3 py-2 text-sm focus:outline-none focus:border-gold-500 transition-colors placeholder-gray-700"
+                            />
+                          </div>
+                          <div>
+                            <label className="block font-heading text-xs text-gray-500 uppercase tracking-widest mb-1.5">Estado (opcional)</label>
+                            <input
+                              value={addForm.region}
+                              onChange={e => setAddForm(f => ({ ...f, region: e.target.value }))}
+                              placeholder="Ex: Rio de Janeiro"
+                              className="w-full bg-navy-900 border border-navy-700 text-white px-3 py-2 text-sm focus:outline-none focus:border-gold-500 transition-colors placeholder-gray-700"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <button
+                            onClick={handleAddVotes}
+                            disabled={adding}
+                            className="flex items-center gap-2 bg-gold-500 text-navy-950 font-heading text-xs uppercase tracking-widest px-5 py-2.5 hover:bg-gold-400 transition-colors disabled:opacity-60"
+                          >
+                            {adding ? <Loader2 size={13} className="animate-spin" /> : <Vote size={13} />}
+                            {adding ? 'Registrando...' : `Adicionar ${addForm.qtd} voto(s)`}
+                          </button>
+                          {addMsg && (
+                            <span className={`text-xs font-heading ${addMsg.startsWith('✓') ? 'text-green-400' : 'text-red-400'}`}>
+                              {addMsg}
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     )}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                  </div>
+
+                  {/* Tabela de votos */}
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-navy-700">
+                          {['#','IP','Chapa','Cidade','Estado','Data/Hora'].map(h => (
+                            <th key={h} className="text-left font-heading text-xs text-gray-500 uppercase tracking-widest px-4 py-3">{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {votes.map((v, i) => (
+                          <tr key={v.id} className="border-b border-navy-800 hover:bg-navy-900 transition-colors">
+                            <td className="px-4 py-3 text-gray-600 text-xs">{votes.length - i}</td>
+                            <td className="px-4 py-3 text-gray-300 font-mono text-xs">{v.ip_address}</td>
+                            <td className="px-4 py-3">
+                              <span className={`font-heading text-xs tracking-wide ${v.chapa_id === 1 ? 'text-gold-400' : 'text-gray-400'}`}>{v.chapa_nome}</span>
+                            </td>
+                            <td className="px-4 py-3 text-gray-400 text-xs">{v.city || '—'}</td>
+                            <td className="px-4 py-3 text-gray-400 text-xs">{v.region || '—'}</td>
+                            <td className="px-4 py-3 text-gray-500 text-xs">{fmt(v.created_at)}</td>
+                          </tr>
+                        ))}
+                        {votes.length === 0 && (
+                          <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-600">Nenhum voto registrado ainda.</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )
+            })()}
 
             {/* Visits */}
             {tab === 'visitas' && (
