@@ -264,9 +264,19 @@ export default function AcoesImediatasPage() {
   const [submitting,  setSubmitting]  = useState({})
   const [pdfLoading,  setPdfLoading]  = useState(false)
   const [pdfSharing,  setPdfSharing]  = useState(false)
+  const [cachedPdf,   setCachedPdf]   = useState(null)
   const visitor = useVisitor()
 
   useEffect(() => { window.scrollTo(0, 0) }, [])
+
+  // Pré-gera o PDF em background para que o share seja instantâneo (iOS/Android)
+  useEffect(() => {
+    let cancelled = false
+    generateChapaPDF({ returnBlob: true })
+      .then(file => { if (!cancelled) setCachedPdf(file) })
+      .catch(() => {}) // falha silenciosa — gera no momento do share
+    return () => { cancelled = true }
+  }, [])
 
   // ── Carrega médias do Supabase ──────────────────────────────────────────────
   const loadCommunityRatings = useCallback(async () => {
@@ -353,7 +363,9 @@ export default function AcoesImediatasPage() {
     if (pdfSharing) return
     setPdfSharing(true)
     try {
-      const file = await generateChapaPDF({ returnBlob: true })
+      // Usa PDF pré-gerado (sem await = gesto preservado no iOS/Android)
+      // Caso não esteja pronto ainda, gera agora (pode falhar no iOS)
+      const file = cachedPdf ?? await generateChapaPDF({ returnBlob: true })
       const url  = 'https://gestao-e-luta.vercel.app/'
       const text = 'Conheça as propostas e as ações imediatas da Chapa 3 — GESTÃO E LUTA!'
       if (navigator.share && navigator.canShare?.({ files: [file] })) {

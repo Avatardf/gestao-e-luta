@@ -276,8 +276,18 @@ export default function PropostasPage() {
   const [submitting, setSubmitting] = useState({}) // { [proposalId]: bool }
   const [pdfLoading,  setPdfLoading]  = useState(false)
   const [pdfSharing,  setPdfSharing]  = useState(false)
+  const [cachedPdf,   setCachedPdf]   = useState(null)
   const [fonteLevel, setFonteLevel] = useState(0) // 0 = normal, 1 = médio, 2 = grande
   const visitor = useVisitor()
+
+  // Pré-gera o PDF em background para que o share seja instantâneo (iOS/Android)
+  useEffect(() => {
+    let cancelled = false
+    generateChapaPDF({ returnBlob: true })
+      .then(file => { if (!cancelled) setCachedPdf(file) })
+      .catch(() => {}) // falha silenciosa — gera no momento do share
+    return () => { cancelled = true }
+  }, [])
 
   async function handleDownloadPDF() {
     if (pdfLoading) return
@@ -296,7 +306,9 @@ export default function PropostasPage() {
     if (pdfSharing) return
     setPdfSharing(true)
     try {
-      const file = await generateChapaPDF({ returnBlob: true })
+      // Usa PDF pré-gerado (sem await = gesto preservado no iOS/Android)
+      // Caso não esteja pronto ainda, gera agora (pode falhar no iOS)
+      const file = cachedPdf ?? await generateChapaPDF({ returnBlob: true })
       const url  = 'https://gestao-e-luta.vercel.app/'
       const text = 'Conheça as propostas e as ações imediatas da Chapa 3 — GESTÃO E LUTA!'
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
