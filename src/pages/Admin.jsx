@@ -846,7 +846,12 @@ export default function Admin() {
               const rejected = depoimentos.filter(d => d.status === 'rejected')
 
               async function setStatus(id, status) {
-                await supabase.from('depoimentos').update({ status }).eq('id', id)
+                const { error } = await supabase.from('depoimentos').update({ status }).eq('id', id)
+                if (error) {
+                  console.error('Erro ao atualizar status:', error)
+                  alert(`Erro ao atualizar depoimento.\n\nVerifique se o SQL de migração foi executado no Supabase:\nALTER TABLE depoimentos ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'pending';`)
+                  return
+                }
                 loadData()
               }
               async function excluir(id) {

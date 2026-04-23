@@ -296,23 +296,29 @@ export default function PropostasPage() {
     if (pdfSharing) return
     setPdfSharing(true)
     try {
-      // Testa se o dispositivo suporta share com arquivo antes de gerar o blob
-      const testFile = new File([''], 'test.pdf', { type: 'application/pdf' })
-      const canShareFile = navigator.share && navigator.canShare?.({ files: [testFile] })
+      const file = await generateChapaPDF({ returnBlob: true })
+      const url  = 'https://gestao-e-luta.vercel.app/'
+      const text = 'Conheça as propostas e as ações imediatas da Chapa 3 — GESTÃO E LUTA!'
 
-      if (canShareFile) {
-        const file = await generateChapaPDF({ returnBlob: true })
-        const url  = 'https://gestao-e-luta.vercel.app/'
-        const text = 'Conheça as propostas e as ações imediatas da Chapa 3 — GESTÃO E LUTA!'
-        await navigator.share({ title: 'Chapa 3 — Gestão e Luta', text, url, files: [file] })
-      } else {
-        // Desktop: baixa o PDF diretamente (mesmo comportamento do botão de download)
-        await generateChapaPDF()
+      // Tenta compartilhar com o arquivo; se não suportado, faz download
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        try {
+          await navigator.share({ title: 'Chapa 3 — Gestão e Luta', text, url, files: [file] })
+          return
+        } catch (shareErr) {
+          if (shareErr?.name === 'AbortError') return
+          // Falhou o share — cai no download abaixo
+        }
       }
+      const blobUrl = URL.createObjectURL(file)
+      const a = document.createElement('a')
+      a.href = blobUrl
+      a.download = file.name
+      a.click()
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 2000)
     } catch (e) {
-      if (e?.name !== 'AbortError') {
-        console.error('Erro ao compartilhar PDF:', e)
-      }
+      console.error('Erro ao gerar PDF:', e)
+      alert('Não foi possível gerar o PDF. Tente novamente.')
     } finally {
       setPdfSharing(false)
     }
