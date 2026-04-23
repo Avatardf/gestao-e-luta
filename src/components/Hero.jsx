@@ -30,7 +30,7 @@ export default function Hero() {
   useEffect(() => { const t = setTimeout(() => setLoaded(true), 80); return () => clearTimeout(t) }, [])
 
   return (
-    <section id="hero" className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-white dark:bg-navy-950">
+    <section id="hero" className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-white dark:bg-navy-950 pt-16">
 
       {/* Diagonal grid */}
       <div className="absolute inset-0 opacity-[0.04]">
