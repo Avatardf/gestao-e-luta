@@ -104,4 +104,11 @@ export const acoesImediatas = [
     descricao:
       'Não mentir na campanha com promessas sabidamente descabidas com objetivo eleitoreiro.',
   },
+  {
+    id: 16,
+    icone: '🔍',
+    titulo: 'Transparência e respeito ao SINDPOL-RJ',
+    descricao:
+      'Providenciaremos alterações estatutárias que promovam maior transparência e respeito às contribuições dos sindicalizados. Independentemente do êxito dessas alterações, atuaremos com o máximo de transparência possível e consultaremos os filiados sempre que alguma decisão impactar as finanças do SINDPOL-RJ.',
+  },
 ]
