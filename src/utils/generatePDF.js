@@ -282,7 +282,7 @@ export async function generateChapaPDF({ returnBlob = false } = {}) {
   })))
 
   const wrapper = document.createElement('div')
-  wrapper.style.cssText = 'position:absolute;top:-999999px;left:0;visibility:hidden;pointer-events:none;display:flex;flex-direction:column;gap:0;'
+  wrapper.style.cssText = 'position:fixed;top:0;left:-9999px;z-index:-1;pointer-events:none;display:flex;flex-direction:column;gap:0;'
   wrapper.innerHTML = await buildPage1(withPhotos) + buildPage2() + buildPage3()
   document.body.appendChild(wrapper)
 
