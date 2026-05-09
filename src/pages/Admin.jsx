@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
-import { Shield, RefreshCw, Trash2, LogOut, Loader2, Users, Vote, MapPin, Clock, Edit2, Save, X, ChevronDown, ChevronUp, Camera, Plus, Newspaper, MessageSquare, Crop, Check, Clock3 } from 'lucide-react'
+import { Shield, RefreshCw, Trash2, LogOut, Loader2, Users, Vote, MapPin, Clock, Edit2, Save, X, ChevronDown, ChevronUp, Camera, Plus, Newspaper, MessageSquare, Crop, Check, Clock3, TrendingUp, BarChart2 } from 'lucide-react'
 
 const META       = 600
 const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASSWORD || 'gestao2025'
@@ -566,6 +566,188 @@ function NoticiaAdmin({ noticias, onRefresh }) {
   )
 }
 
+// ── Aba Analytics ───────────────────────────────────────────────
+function AnalyticsTab({ visits }) {
+  // Converte para horário de Brasília
+  function toSP(dateStr) {
+    return new Date(new Date(dateStr).toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }))
+  }
+
+  // Últimos 14 dias
+  const dayLabels = Array.from({ length: 14 }, (_, i) => {
+    const d = new Date(); d.setDate(d.getDate() - (13 - i))
+    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`
+  })
+  const dayMap = {}
+  visits.forEach(v => {
+    const d = toSP(v.created_at)
+    const k = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`
+    dayMap[k] = (dayMap[k] || 0) + 1
+  })
+  const dayData = dayLabels.map(l => ({ label: l, value: dayMap[l] || 0 }))
+
+  // Por hora (0–23)
+  const hourData = Array.from({ length: 24 }, (_, h) => ({ label: String(h).padStart(2,'0'), value: 0 }))
+  visits.forEach(v => { hourData[toSP(v.created_at).getHours()].value += 1 })
+
+  // Top cidades / estados
+  const cityMap = {}, stateMap = {}
+  visits.forEach(v => {
+    if (v.city)   cityMap[v.city]     = (cityMap[v.city]   || 0) + 1
+    if (v.region) stateMap[v.region]  = (stateMap[v.region]|| 0) + 1
+  })
+  const topCities = Object.entries(cityMap).sort((a,b)=>b[1]-a[1]).slice(0,10)
+  const topStates = Object.entries(stateMap).sort((a,b)=>b[1]-a[1]).slice(0,10)
+
+  // Picos
+  const peakDay  = dayData.reduce((a,b) => b.value > a.value ? b : a, dayData[0])
+  const peakHour = hourData.reduce((a,b) => b.value > a.value ? b : a)
+  const withLoc  = visits.filter(v => v.city).length
+  const locPct   = visits.length ? Math.round((withLoc / visits.length) * 100) : 0
+
+  // ── SVG Line Chart (14 dias) ────────────────────────────────────
+  function LineChart({ data }) {
+    const W=640, H=150, PL=36, PR=10, PT=10, PB=32
+    const cW = W-PL-PR, cH = H-PT-PB
+    const maxV = Math.max(...data.map(d=>d.value), 1)
+    const xOf = i => PL + (i/(data.length-1))*cW
+    const yOf = v => PT + cH - (v/maxV)*cH
+    const pts = data.map((d,i)=>`${xOf(i).toFixed(1)},${yOf(d.value).toFixed(1)}`).join(' ')
+    const area = `M ${PL},${PT+cH} ` + data.map((d,i)=>`L ${xOf(i).toFixed(1)},${yOf(d.value).toFixed(1)}`).join(' ') + ` L ${xOf(data.length-1).toFixed(1)},${PT+cH} Z`
+    const ticks = [0, Math.round(maxV/2), maxV]
+    return (
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto">
+        <defs>
+          <linearGradient id="lg1" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stopColor="#d4af37" stopOpacity="0.25"/>
+            <stop offset="100%" stopColor="#d4af37" stopOpacity="0.02"/>
+          </linearGradient>
+        </defs>
+        {ticks.map(v=>(
+          <g key={v}>
+            <line x1={PL} x2={W-PR} y1={yOf(v).toFixed(1)} y2={yOf(v).toFixed(1)} stroke="#1e293b" strokeWidth="1"/>
+            <text x={PL-4} y={(yOf(v)+4).toFixed(1)} textAnchor="end" fontSize="9" fill="#475569">{v}</text>
+          </g>
+        ))}
+        <path d={area} fill="url(#lg1)"/>
+        <polyline points={pts} fill="none" stroke="#d4af37" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round"/>
+        {data.map((d,i) => d.value > 0 && (
+          <circle key={i} cx={xOf(i).toFixed(1)} cy={yOf(d.value).toFixed(1)} r="3" fill="#d4af37" stroke="#0f172a" strokeWidth="1.5"/>
+        ))}
+        {data.map((d,i) => i%2===0 && (
+          <text key={i} x={xOf(i).toFixed(1)} y={H-6} textAnchor="middle" fontSize="8.5" fill="#475569">{d.label}</text>
+        ))}
+      </svg>
+    )
+  }
+
+  // ── SVG Bar Chart (24 horas) ─────────────────────────────────────
+  function HourBar({ data }) {
+    const W=640, H=120, PL=28, PR=8, PT=8, PB=28
+    const cW=W-PL-PR, cH=H-PT-PB
+    const maxV = Math.max(...data.map(d=>d.value), 1)
+    const bW   = cW/data.length
+    const peak = data.reduce((a,b)=>b.value>a.value?b:a)
+    return (
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto">
+        {data.map((d,i)=>{
+          const x  = PL + i*bW
+          const bH = (d.value/maxV)*cH
+          const y  = PT+cH-bH
+          const isPeak = d.label===peak.label
+          return (
+            <g key={i}>
+              <rect x={(x+1).toFixed(1)} y={y.toFixed(1)} width={(bW-2).toFixed(1)} height={bH.toFixed(1)}
+                fill={isPeak ? '#f4d06f' : '#60a5fa'} fillOpacity={isPeak ? 0.9 : 0.5}/>
+              {i%2===0 && (
+                <text x={(x+bW/2).toFixed(1)} y={H-6} textAnchor="middle" fontSize="8" fill="#475569">{d.label}h</text>
+              )}
+            </g>
+          )
+        })}
+      </svg>
+    )
+  }
+
+  // ── Barra horizontal ─────────────────────────────────────────────
+  function HBar({ label, value, max, color='#d4af37' }) {
+    const pct = max>0 ? (value/max)*100 : 0
+    return (
+      <div className="flex items-center gap-3 py-1.5">
+        <div className="w-32 text-right text-xs text-gray-400 truncate flex-shrink-0" title={label}>{label}</div>
+        <div className="flex-1 h-5 bg-navy-800 overflow-hidden relative">
+          <div className="h-full transition-all duration-500"
+            style={{ width:`${pct}%`, background:`linear-gradient(90deg,${color}66,${color})` }}/>
+          <span className="absolute right-2 top-0 bottom-0 flex items-center text-[10px] font-heading text-white/50">{value}</span>
+        </div>
+      </div>
+    )
+  }
+
+  const maxCity  = topCities[0]?.[1] || 1
+  const maxState = topStates[0]?.[1] || 1
+
+  return (
+    <div className="space-y-5">
+
+      {/* KPIs de pico */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[
+          { label:'Dia de pico',     value: peakDay?.label  || '—', sub:`${peakDay?.value||0} visitas`,  color:'text-gold-400' },
+          { label:'Hora de pico',    value: `${peakHour.label}h`,   sub:`${peakHour.value} visitas`,      color:'text-blue-400' },
+          { label:'Cidade líder',    value: topCities[0]?.[0]||'—', sub:`${topCities[0]?.[1]||0} visitas`,color:'text-green-400' },
+          { label:'Com localização', value: `${locPct}%`,           sub:`${withLoc}/${visits.length}`,    color:'text-purple-400' },
+        ].map(k=>(
+          <div key={k.label} className="bg-navy-900 border border-navy-700 p-4 text-center">
+            <div className={`font-heading text-2xl ${k.color} truncate`}>{k.value}</div>
+            <div className="text-gray-500 text-[10px] uppercase tracking-widest font-heading mt-1">{k.label}</div>
+            <div className="text-gray-600 text-[10px] mt-0.5">{k.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Linha — últimos 14 dias */}
+      <div className="bg-navy-900 border border-navy-700 p-5">
+        <h4 className="font-heading text-white text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
+          <TrendingUp size={13} className="text-gold-500"/> Visitas — últimos 14 dias
+        </h4>
+        <LineChart data={dayData}/>
+      </div>
+
+      {/* Barras — distribuição por hora */}
+      <div className="bg-navy-900 border border-navy-700 p-5">
+        <h4 className="font-heading text-white text-xs uppercase tracking-widest mb-1 flex items-center gap-2">
+          <Clock size={13} className="text-blue-400"/> Distribuição por hora do dia
+        </h4>
+        <p className="text-gray-600 text-[10px] mb-4">Horário de Brasília · barra dourada = pico de acessos</p>
+        <HourBar data={hourData}/>
+      </div>
+
+      {/* Localidades */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-navy-900 border border-navy-700 p-5">
+          <h4 className="font-heading text-white text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
+            <MapPin size={13} className="text-green-400"/> Top 10 cidades
+          </h4>
+          {topCities.length === 0
+            ? <p className="text-gray-600 text-sm text-center py-6">Sem dados de localização.</p>
+            : topCities.map(([c,n]) => <HBar key={c} label={c} value={n} max={maxCity}/>)
+          }
+        </div>
+        <div className="bg-navy-900 border border-navy-700 p-5">
+          <h4 className="font-heading text-white text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
+            <MapPin size={13} className="text-purple-400"/> Top estados
+          </h4>
+          {topStates.length === 0
+            ? <p className="text-gray-600 text-sm text-center py-6">Sem dados de localização.</p>
+            : topStates.map(([s,n]) => <HBar key={s} label={s} value={n} max={maxState} color="#a78bfa"/>)
+          }
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Página Admin ────────────────────────────────────────────────
 export default function Admin() {
   const [auth, setAuth]           = useState(false)
@@ -759,14 +941,15 @@ export default function Admin() {
 
             {/* Tabs */}
             <div className="flex gap-1 mb-4 border-b border-navy-700">
-              {['votos', 'visitas', 'diretores', 'mensagens', 'depoimentos', 'noticias'].map(t => (
+              {['votos', 'visitas', 'analytics', 'diretores', 'mensagens', 'depoimentos', 'noticias'].map(t => (
                 <button key={t} onClick={() => setTab(t)}
                   className={`font-heading text-xs uppercase tracking-widest px-4 py-3 transition-colors border-b-2 -mb-px whitespace-nowrap ${tab === t ? 'border-gold-500 text-gold-400' : 'border-transparent text-gray-500 hover:text-gray-300'}`}>
-                  {t === 'votos' ? `Votos (${votes.length})`
-                    : t === 'visitas' ? `Visitas (${visits.length})`
-                    : t === 'diretores' ? `Diretores (${directors.length})`
-                    : t === 'mensagens' ? `Mensagens (${messages.length})`
-                    : t === 'depoimentos' ? (
+                  {t === 'votos'       ? `Votos (${votes.length})`
+                  : t === 'visitas'    ? `Visitas (${visits.length})`
+                  : t === 'analytics'  ? <span className="flex items-center gap-1.5"><BarChart2 size={11}/> Analytics</span>
+                  : t === 'diretores'  ? `Diretores (${directors.length})`
+                  : t === 'mensagens'  ? `Mensagens (${messages.length})`
+                  : t === 'depoimentos' ? (
                       <span className="flex items-center gap-2">
                         {`Depoimentos (${depoimentos.length})`}
                         {depoimentos.filter(d => d.status === 'pending').length > 0 && (
@@ -776,7 +959,7 @@ export default function Admin() {
                         )}
                       </span>
                     )
-                    : `Notícias (${noticias.length})`}
+                  : `Notícias (${noticias.length})`}
                 </button>
               ))}
             </div>
@@ -921,6 +1104,9 @@ export default function Admin() {
                 </table>
               </div>
             )}
+
+            {/* Analytics */}
+            {tab === 'analytics' && <AnalyticsTab visits={visits} />}
 
             {/* Directors editor */}
             {tab === 'diretores' && (
