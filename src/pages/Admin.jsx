@@ -568,32 +568,88 @@ function NoticiaAdmin({ noticias, onRefresh }) {
 
 // ── Aba Analytics ───────────────────────────────────────────────
 function AnalyticsTab({ visits }) {
-  // Converte para horário de Brasília
+  const [period, setPeriod] = useState('14d')
+
+  const PERIODS = [
+    { key: '7d',  label: '7 dias'        },
+    { key: '14d', label: '14 dias'       },
+    { key: '30d', label: '30 dias'       },
+    { key: 'all', label: 'Desde o início'},
+  ]
+
   function toSP(dateStr) {
     return new Date(new Date(dateStr).toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }))
   }
-
-  // Últimos 14 dias
-  const dayLabels = Array.from({ length: 14 }, (_, i) => {
-    const d = new Date(); d.setDate(d.getDate() - (13 - i))
+  function ddmm(d) {
     return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`
-  })
-  const dayMap = {}
-  visits.forEach(v => {
-    const d = toSP(v.created_at)
-    const k = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`
-    dayMap[k] = (dayMap[k] || 0) + 1
-  })
-  const dayData = dayLabels.map(l => ({ label: l, value: dayMap[l] || 0 }))
+  }
 
-  // Por hora (0–23)
+  // Data de início do site (primeira visita registrada)
+  const firstVisit = visits.length
+    ? new Date(Math.min(...visits.map(v => new Date(v.created_at).getTime())))
+    : new Date()
+
+  const now = new Date()
+  const cutoff = period === 'all'
+    ? new Date(firstVisit.getFullYear(), firstVisit.getMonth(), firstVisit.getDate())
+    : new Date(now.getTime() - { '7d':7, '14d':14, '30d':30 }[period] * 86400000)
+
+  // Visitas filtradas pelo período
+  const filtered = visits.filter(v => new Date(v.created_at) >= cutoff)
+
+  // ── Gráfico de linha: dia ou semana dependendo do span ──────────
+  const spanDays = Math.ceil((now.getTime() - cutoff.getTime()) / 86400000)
+  const byWeek   = spanDays > 45
+
+  let dayData
+  if (byWeek) {
+    // Agrupa por semana (segunda-feira como início)
+    const wMap = {}
+    filtered.forEach(v => {
+      const d   = toSP(v.created_at)
+      const day = d.getDay()
+      const mon = new Date(d)
+      mon.setDate(d.getDate() - (day === 0 ? 6 : day - 1))
+      mon.setHours(0,0,0,0)
+      const k = mon.getTime()
+      wMap[k] = (wMap[k] || 0) + 1
+    })
+    // Gera todas as semanas do intervalo
+    const cur = new Date(cutoff)
+    const dow = cur.getDay()
+    cur.setDate(cur.getDate() - (dow === 0 ? 6 : dow - 1))
+    cur.setHours(0,0,0,0)
+    const weeks = []
+    while (cur <= now) {
+      weeks.push({ label: ddmm(cur), value: wMap[cur.getTime()] || 0 })
+      cur.setDate(cur.getDate() + 7)
+    }
+    dayData = weeks
+  } else {
+    // Agrupa por dia
+    const dMap = {}
+    filtered.forEach(v => {
+      const d = toSP(v.created_at)
+      const k = ddmm(d)
+      dMap[k] = (dMap[k] || 0) + 1
+    })
+    const cur = new Date(cutoff); cur.setHours(0,0,0,0)
+    const days = []
+    while (cur <= now) {
+      days.push({ label: ddmm(cur), value: dMap[ddmm(cur)] || 0 })
+      cur.setDate(cur.getDate() + 1)
+    }
+    dayData = days
+  }
+
+  // Por hora (0–23) — período filtrado
   const hourData = Array.from({ length: 24 }, (_, h) => ({ label: String(h).padStart(2,'0'), value: 0 }))
-  visits.forEach(v => { hourData[toSP(v.created_at).getHours()].value += 1 })
+  filtered.forEach(v => { hourData[toSP(v.created_at).getHours()].value += 1 })
 
-  // Top cidades / estados (inclui "Sem localização")
+  // Top cidades / estados — período filtrado
   const SEM_LOC = '— Sem localização'
   const cityMap = {}, stateMap = {}
-  visits.forEach(v => {
+  filtered.forEach(v => {
     const city  = v.city   || SEM_LOC
     const state = v.region || SEM_LOC
     cityMap[city]   = (cityMap[city]   || 0) + 1
@@ -602,27 +658,31 @@ function AnalyticsTab({ visits }) {
   const topCities = Object.entries(cityMap).sort((a,b)=>b[1]-a[1]).slice(0,11)
   const topStates = Object.entries(stateMap).sort((a,b)=>b[1]-a[1]).slice(0,11)
 
-  // Picos
-  const peakDay  = dayData.reduce((a,b) => b.value > a.value ? b : a, dayData[0])
-  const peakHour = hourData.reduce((a,b) => b.value > a.value ? b : a)
-  const withLoc  = visits.filter(v => v.city).length
-  const locPct   = visits.length ? Math.round((withLoc / visits.length) * 100) : 0
+  // KPIs
+  const peakDay  = dayData.length  ? dayData.reduce((a,b) => b.value>a.value?b:a)  : { label:'—', value:0 }
+  const peakHour = hourData.reduce((a,b) => b.value>a.value?b:a)
+  const withLoc  = filtered.filter(v => v.city).length
+  const locPct   = filtered.length ? Math.round((withLoc/filtered.length)*100) : 0
 
-  // ── SVG Line Chart (14 dias) ────────────────────────────────────
+  // ── SVG Line Chart ──────────────────────────────────────────────
   function LineChart({ data }) {
-    const W=640, H=150, PL=36, PR=10, PT=10, PB=32
-    const cW = W-PL-PR, cH = H-PT-PB
+    if (data.length < 2) return <p className="text-gray-600 text-sm text-center py-6">Dados insuficientes.</p>
+    const W=640, H=155, PL=38, PR=10, PT=10, PB=34
+    const cW=W-PL-PR, cH=H-PT-PB
     const maxV = Math.max(...data.map(d=>d.value), 1)
-    const xOf = i => PL + (i/(data.length-1))*cW
-    const yOf = v => PT + cH - (v/maxV)*cH
-    const pts = data.map((d,i)=>`${xOf(i).toFixed(1)},${yOf(d.value).toFixed(1)}`).join(' ')
-    const area = `M ${PL},${PT+cH} ` + data.map((d,i)=>`L ${xOf(i).toFixed(1)},${yOf(d.value).toFixed(1)}`).join(' ') + ` L ${xOf(data.length-1).toFixed(1)},${PT+cH} Z`
-    const ticks = [0, Math.round(maxV/2), maxV]
+    const xOf  = i => PL + (i/(data.length-1))*cW
+    const yOf  = v => PT + cH - (v/maxV)*cH
+    const pts  = data.map((d,i)=>`${xOf(i).toFixed(1)},${yOf(d.value).toFixed(1)}`).join(' ')
+    const area = `M ${PL},${(PT+cH).toFixed(1)} ` +
+                 data.map((d,i)=>`L ${xOf(i).toFixed(1)},${yOf(d.value).toFixed(1)}`).join(' ') +
+                 ` L ${xOf(data.length-1).toFixed(1)},${(PT+cH).toFixed(1)} Z`
+    const ticks    = [0, Math.round(maxV/2), maxV]
+    const every    = data.length > 30 ? 4 : data.length > 14 ? 2 : 1
     return (
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto">
         <defs>
           <linearGradient id="lg1" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stopColor="#d4af37" stopOpacity="0.25"/>
+            <stop offset="0%"   stopColor="#d4af37" stopOpacity="0.3"/>
             <stop offset="100%" stopColor="#d4af37" stopOpacity="0.02"/>
           </linearGradient>
         </defs>
@@ -634,17 +694,21 @@ function AnalyticsTab({ visits }) {
         ))}
         <path d={area} fill="url(#lg1)"/>
         <polyline points={pts} fill="none" stroke="#d4af37" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round"/>
-        {data.map((d,i) => d.value > 0 && (
-          <circle key={i} cx={xOf(i).toFixed(1)} cy={yOf(d.value).toFixed(1)} r="3" fill="#d4af37" stroke="#0f172a" strokeWidth="1.5"/>
+        {data.map((d,i) => d.value>0 && (
+          <circle key={i} cx={xOf(i).toFixed(1)} cy={yOf(d.value).toFixed(1)} r={data.length>30?2:3}
+            fill="#d4af37" stroke="#0f172a" strokeWidth="1.5"/>
         ))}
-        {data.map((d,i) => i%2===0 && (
+        {data.map((d,i) => i%every===0 && (
           <text key={i} x={xOf(i).toFixed(1)} y={H-6} textAnchor="middle" fontSize="8.5" fill="#475569">{d.label}</text>
         ))}
+        {byWeek && (
+          <text x={W-PR} y={H-6} textAnchor="end" fontSize="8" fill="#334155">semanas · segunda</text>
+        )}
       </svg>
     )
   }
 
-  // ── SVG Bar Chart (24 horas) ─────────────────────────────────────
+  // ── SVG Bar Chart (24 horas) ────────────────────────────────────
   function HourBar({ data }) {
     const W=640, H=120, PL=28, PR=8, PT=8, PB=28
     const cW=W-PL-PR, cH=H-PT-PB
@@ -654,14 +718,12 @@ function AnalyticsTab({ visits }) {
     return (
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto">
         {data.map((d,i)=>{
-          const x  = PL + i*bW
-          const bH = (d.value/maxV)*cH
-          const y  = PT+cH-bH
+          const x=PL+i*bW, bH=(d.value/maxV)*cH, y=PT+cH-bH
           const isPeak = d.label===peak.label
           return (
             <g key={i}>
               <rect x={(x+1).toFixed(1)} y={y.toFixed(1)} width={(bW-2).toFixed(1)} height={bH.toFixed(1)}
-                fill={isPeak ? '#f4d06f' : '#60a5fa'} fillOpacity={isPeak ? 0.9 : 0.5}/>
+                fill={isPeak?'#f4d06f':'#60a5fa'} fillOpacity={isPeak?0.9:0.5}/>
               {i%2===0 && (
                 <text x={(x+bW/2).toFixed(1)} y={H-6} textAnchor="middle" fontSize="8" fill="#475569">{d.label}h</text>
               )}
@@ -672,20 +734,19 @@ function AnalyticsTab({ visits }) {
     )
   }
 
-  // ── Barra horizontal ─────────────────────────────────────────────
+  // ── Barra horizontal ────────────────────────────────────────────
   function HBar({ label, value, max, color='#d4af37' }) {
-    const pct    = max>0 ? (value/max)*100 : 0
-    const noLoc  = label === SEM_LOC
-    const barColor = noLoc ? '#475569' : color
+    const pct   = max>0 ? (value/max)*100 : 0
+    const noLoc = label===SEM_LOC
     return (
       <div className="flex items-center gap-3 py-1.5">
-        <div className={`w-32 text-right text-xs truncate flex-shrink-0 ${noLoc ? 'text-gray-600 italic' : 'text-gray-400'}`} title={label}>
-          {noLoc ? 'Sem localização' : label}
+        <div className={`w-32 text-right text-xs truncate flex-shrink-0 ${noLoc?'text-gray-600 italic':'text-gray-400'}`} title={label}>
+          {noLoc?'Sem localização':label}
         </div>
         <div className="flex-1 h-5 bg-navy-800 overflow-hidden relative">
           <div className="h-full transition-all duration-500"
-            style={{ width:`${pct}%`, background: noLoc ? '#334155' : `linear-gradient(90deg,${barColor}66,${barColor})` }}/>
-          <span className={`absolute right-2 top-0 bottom-0 flex items-center text-[10px] font-heading ${noLoc ? 'text-gray-600' : 'text-white/50'}`}>{value}</span>
+            style={{ width:`${pct}%`, background:noLoc?'#334155':`linear-gradient(90deg,${color}66,${color})` }}/>
+          <span className={`absolute right-2 top-0 bottom-0 flex items-center text-[10px] font-heading ${noLoc?'text-gray-600':'text-white/50'}`}>{value}</span>
         </div>
       </div>
     )
@@ -694,16 +755,38 @@ function AnalyticsTab({ visits }) {
   const maxCity  = topCities[0]?.[1] || 1
   const maxState = topStates[0]?.[1] || 1
 
+  const periodoLabel = period==='all'
+    ? `desde ${ddmm(firstVisit)}/${firstVisit.getFullYear()}`
+    : `últimos ${{ '7d':'7','14d':'14','30d':'30' }[period]} dias`
+
   return (
     <div className="space-y-5">
 
-      {/* KPIs de pico */}
+      {/* Filtro de período */}
+      <div className="flex items-center gap-2 flex-wrap border border-navy-700 bg-navy-900 px-4 py-3">
+        <span className="font-heading text-gray-500 text-[10px] uppercase tracking-widest mr-1">Período</span>
+        {PERIODS.map(p => (
+          <button key={p.key} onClick={() => setPeriod(p.key)}
+            className={`font-heading text-[10px] uppercase tracking-widest px-3 py-1.5 border transition-colors duration-150 ${
+              period===p.key
+                ? 'border-gold-500 text-gold-400 bg-gold-500/10'
+                : 'border-navy-600 text-gray-500 hover:border-navy-400 hover:text-gray-300'
+            }`}>
+            {p.label}
+          </button>
+        ))}
+        <span className="ml-auto font-heading text-gray-600 text-[10px] tabular-nums">
+          {filtered.length.toLocaleString('pt-BR')} visitas · {periodoLabel}
+        </span>
+      </div>
+
+      {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label:'Dia de pico',     value: peakDay?.label  || '—', sub:`${peakDay?.value||0} visitas`,  color:'text-gold-400' },
-          { label:'Hora de pico',    value: `${peakHour.label}h`,   sub:`${peakHour.value} visitas`,      color:'text-blue-400' },
-          { label:'Cidade líder',    value: topCities[0]?.[0]||'—', sub:`${topCities[0]?.[1]||0} visitas`,color:'text-green-400' },
-          { label:'Com localização', value: `${locPct}%`,           sub:`${withLoc}/${visits.length}`,    color:'text-purple-400' },
+          { label:'Dia de pico',     value: peakDay.label,              sub:`${peakDay.value} visitas`,       color:'text-gold-400'   },
+          { label:'Hora de pico',    value: `${peakHour.label}h`,       sub:`${peakHour.value} visitas`,      color:'text-blue-400'   },
+          { label:'Cidade líder',    value: topCities[0]?.[0]||'—',     sub:`${topCities[0]?.[1]||0} visitas`,color:'text-green-400'  },
+          { label:'Com localização', value: `${locPct}%`,               sub:`${withLoc}/${filtered.length}`,  color:'text-purple-400' },
         ].map(k=>(
           <div key={k.label} className="bg-navy-900 border border-navy-700 p-4 text-center">
             <div className={`font-heading text-2xl ${k.color} truncate`}>{k.value}</div>
@@ -713,20 +796,22 @@ function AnalyticsTab({ visits }) {
         ))}
       </div>
 
-      {/* Linha — últimos 14 dias */}
+      {/* Gráfico de linha */}
       <div className="bg-navy-900 border border-navy-700 p-5">
         <h4 className="font-heading text-white text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
-          <TrendingUp size={13} className="text-gold-500"/> Visitas — últimos 14 dias
+          <TrendingUp size={13} className="text-gold-500"/>
+          Visitas — {byWeek ? 'por semana' : 'por dia'}
+          <span className="ml-1 text-gray-600 text-[10px] normal-case font-normal">· {periodoLabel}</span>
         </h4>
         <LineChart data={dayData}/>
       </div>
 
-      {/* Barras — distribuição por hora */}
+      {/* Barras por hora */}
       <div className="bg-navy-900 border border-navy-700 p-5">
         <h4 className="font-heading text-white text-xs uppercase tracking-widest mb-1 flex items-center gap-2">
           <Clock size={13} className="text-blue-400"/> Distribuição por hora do dia
         </h4>
-        <p className="text-gray-600 text-[10px] mb-4">Horário de Brasília · barra dourada = pico de acessos</p>
+        <p className="text-gray-600 text-[10px] mb-4">Horário de Brasília · barra dourada = pico · período: {periodoLabel}</p>
         <HourBar data={hourData}/>
       </div>
 
@@ -734,20 +819,20 @@ function AnalyticsTab({ visits }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-navy-900 border border-navy-700 p-5">
           <h4 className="font-heading text-white text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
-            <MapPin size={13} className="text-green-400"/> Top 10 cidades
+            <MapPin size={13} className="text-green-400"/> Top cidades
           </h4>
-          {topCities.length === 0
-            ? <p className="text-gray-600 text-sm text-center py-6">Sem dados de localização.</p>
-            : topCities.map(([c,n]) => <HBar key={c} label={c} value={n} max={maxCity}/>)
+          {topCities.length===0
+            ? <p className="text-gray-600 text-sm text-center py-6">Sem dados.</p>
+            : topCities.map(([c,n])=><HBar key={c} label={c} value={n} max={maxCity}/>)
           }
         </div>
         <div className="bg-navy-900 border border-navy-700 p-5">
           <h4 className="font-heading text-white text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
             <MapPin size={13} className="text-purple-400"/> Top estados
           </h4>
-          {topStates.length === 0
-            ? <p className="text-gray-600 text-sm text-center py-6">Sem dados de localização.</p>
-            : topStates.map(([s,n]) => <HBar key={s} label={s} value={n} max={maxState} color="#a78bfa"/>)
+          {topStates.length===0
+            ? <p className="text-gray-600 text-sm text-center py-6">Sem dados.</p>
+            : topStates.map(([s,n])=><HBar key={s} label={s} value={n} max={maxState} color="#a78bfa"/>)
           }
         </div>
       </div>
