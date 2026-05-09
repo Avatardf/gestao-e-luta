@@ -590,14 +590,17 @@ function AnalyticsTab({ visits }) {
   const hourData = Array.from({ length: 24 }, (_, h) => ({ label: String(h).padStart(2,'0'), value: 0 }))
   visits.forEach(v => { hourData[toSP(v.created_at).getHours()].value += 1 })
 
-  // Top cidades / estados
+  // Top cidades / estados (inclui "Sem localização")
+  const SEM_LOC = '— Sem localização'
   const cityMap = {}, stateMap = {}
   visits.forEach(v => {
-    if (v.city)   cityMap[v.city]     = (cityMap[v.city]   || 0) + 1
-    if (v.region) stateMap[v.region]  = (stateMap[v.region]|| 0) + 1
+    const city  = v.city   || SEM_LOC
+    const state = v.region || SEM_LOC
+    cityMap[city]   = (cityMap[city]   || 0) + 1
+    stateMap[state] = (stateMap[state] || 0) + 1
   })
-  const topCities = Object.entries(cityMap).sort((a,b)=>b[1]-a[1]).slice(0,10)
-  const topStates = Object.entries(stateMap).sort((a,b)=>b[1]-a[1]).slice(0,10)
+  const topCities = Object.entries(cityMap).sort((a,b)=>b[1]-a[1]).slice(0,11)
+  const topStates = Object.entries(stateMap).sort((a,b)=>b[1]-a[1]).slice(0,11)
 
   // Picos
   const peakDay  = dayData.reduce((a,b) => b.value > a.value ? b : a, dayData[0])
@@ -671,14 +674,18 @@ function AnalyticsTab({ visits }) {
 
   // ── Barra horizontal ─────────────────────────────────────────────
   function HBar({ label, value, max, color='#d4af37' }) {
-    const pct = max>0 ? (value/max)*100 : 0
+    const pct    = max>0 ? (value/max)*100 : 0
+    const noLoc  = label === SEM_LOC
+    const barColor = noLoc ? '#475569' : color
     return (
       <div className="flex items-center gap-3 py-1.5">
-        <div className="w-32 text-right text-xs text-gray-400 truncate flex-shrink-0" title={label}>{label}</div>
+        <div className={`w-32 text-right text-xs truncate flex-shrink-0 ${noLoc ? 'text-gray-600 italic' : 'text-gray-400'}`} title={label}>
+          {noLoc ? 'Sem localização' : label}
+        </div>
         <div className="flex-1 h-5 bg-navy-800 overflow-hidden relative">
           <div className="h-full transition-all duration-500"
-            style={{ width:`${pct}%`, background:`linear-gradient(90deg,${color}66,${color})` }}/>
-          <span className="absolute right-2 top-0 bottom-0 flex items-center text-[10px] font-heading text-white/50">{value}</span>
+            style={{ width:`${pct}%`, background: noLoc ? '#334155' : `linear-gradient(90deg,${barColor}66,${barColor})` }}/>
+          <span className={`absolute right-2 top-0 bottom-0 flex items-center text-[10px] font-heading ${noLoc ? 'text-gray-600' : 'text-white/50'}`}>{value}</span>
         </div>
       </div>
     )
