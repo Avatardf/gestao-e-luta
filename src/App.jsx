@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ThemeProvider } from './context/ThemeContext'
 import Disclaimer from './components/Disclaimer'
+import AvisoJudicial from './components/AvisoJudicial'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Sobre from './components/Sobre'
@@ -21,6 +22,7 @@ function Site() {
   return (
     <div className="min-h-screen">
       <Navbar />
+      <AvisoJudicial />
       <Hero />
       <Sobre />
       <Diretores />
