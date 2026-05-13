@@ -15,6 +15,7 @@ import Admin from './pages/Admin'
 import PropostasPage from './pages/Propostas'
 import KitPage from './pages/Kit'
 import AcoesImediatasPage from './pages/AcoesImediatas'
+import Suspensao from './pages/Suspensao'
 import { useVisitor } from './hooks/useVisitor'
 
 function Site() {
@@ -54,7 +55,7 @@ export default function App() {
       <BrowserRouter>
         <Disclaimer />
         <Routes>
-          <Route path="/"      element={<Site />} />
+          <Route path="/"      element={<Suspensao />} />
           <Route path="/admin"     element={<Admin />} />
           <Route path="/propostas"       element={<PropostasPage />} />
           <Route path="/acoes-imediatas" element={<AcoesImediatasPage />} />
